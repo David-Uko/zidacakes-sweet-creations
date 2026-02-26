@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { ShoppingBag, Menu, X, User } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ShoppingBag, Menu, X, User, LogOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const navLinks = [
   { to: "/", label: "Home" },
@@ -15,19 +16,19 @@ const navLinks = [
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { totalItems, setIsCartOpen } = useCart();
+  const { user, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 flex items-center justify-between h-16 md:h-20">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2">
           <span className="font-display text-xl md:text-2xl font-bold tracking-tight">
             Zida<span className="text-primary">cakes</span>'n'more
           </span>
         </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
           {navLinks.map(link => (
             <Link
@@ -48,7 +49,6 @@ const Header = () => {
           ))}
         </nav>
 
-        {/* Actions */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsCartOpen(true)}
@@ -66,9 +66,19 @@ const Header = () => {
             )}
           </button>
 
-          <button className="hidden md:flex p-2 rounded-full hover:bg-accent transition-colors">
-            <User className="w-5 h-5" />
-          </button>
+          {user ? (
+            <button
+              onClick={async () => { await signOut(); navigate("/"); }}
+              className="hidden md:flex items-center gap-1 p-2 rounded-full hover:bg-accent transition-colors text-sm font-body text-foreground/70"
+              title="Sign out"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
+          ) : (
+            <Link to="/auth" className="hidden md:flex p-2 rounded-full hover:bg-accent transition-colors">
+              <User className="w-5 h-5" />
+            </Link>
+          )}
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -79,7 +89,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
@@ -103,6 +112,22 @@ const Header = () => {
                   {link.label}
                 </Link>
               ))}
+              {user ? (
+                <button
+                  onClick={async () => { await signOut(); setMobileOpen(false); navigate("/"); }}
+                  className="font-body text-base font-medium py-2 px-3 rounded-lg text-left text-foreground/70 hover:bg-accent"
+                >
+                  Sign Out
+                </button>
+              ) : (
+                <Link
+                  to="/auth"
+                  onClick={() => setMobileOpen(false)}
+                  className="font-body text-base font-medium py-2 px-3 rounded-lg text-foreground/70 hover:bg-accent"
+                >
+                  Sign In
+                </Link>
+              )}
             </nav>
           </motion.div>
         )}
