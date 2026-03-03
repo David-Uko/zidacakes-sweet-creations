@@ -1,17 +1,10 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Cake, Palette, Heart, Send, Calendar } from "lucide-react";
+import { motion } from "framer-motion";
+import { Cake, Palette, Send, Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 
 const sizes = ["6 inch (serves 8-10)", "8 inch (serves 12-16)", "10 inch (serves 20-24)", "12 inch (serves 30-36)"];
 const flavors = ["Vanilla", "Chocolate", "Red Velvet", "Lemon", "Strawberry", "Carrot", "Marble"];
@@ -34,7 +27,7 @@ const Customize = () => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -61,7 +54,7 @@ const Customize = () => {
     setSubmitting(true);
 
     try {
-      // 1. Save to database
+      // 1. Save order to database with unpaid status
       const { data: order, error: dbError } = await supabase
         .from("custom_orders")
         .insert({
@@ -77,57 +70,26 @@ const Customize = () => {
           delivery_date: deliveryDate || null,
           notes,
           status: "pending",
+          payment_status: "unpaid",
         })
         .select()
         .single();
 
       if (dbError) throw dbError;
 
-      // 2. Send customer confirmation email via EmailJS (server-side)
-      try {
-        await supabase.functions.invoke("send-customer-email", {
-          body: {
-            templateParams: {
-              to_email: email,
-              customer_name: fullName,
-              order_id: order.id,
-              cake_size: size,
-              cake_flavor: flavor,
-              cake_filling: filling,
-              delivery_method: delivery,
-              delivery_date: deliveryDate || "To be confirmed",
-            },
-          },
-        });
-      } catch (emailErr) {
-        console.error("EmailJS error:", emailErr);
-      }
+      // 2. Create Stripe checkout session (server-side amount)
+      const { data: sessionData, error: sessionError } = await supabase.functions.invoke(
+        "create-checkout-session",
+        { body: { orderId: order.id } }
+      );
 
-      // 3. Send admin notification via Web3Forms (server-side edge function)
-      try {
-        await supabase.functions.invoke("send-admin-notification", {
-          body: {
-            orderId: order.id,
-            fullName,
-            email,
-            phoneNumber: phone,
-            size,
-            flavor,
-            filling,
-            color,
-            deliveryMethod: delivery,
-            deliveryDate: deliveryDate || "Not specified",
-            notes,
-          },
-        });
-      } catch (adminErr) {
-        console.error("Admin notification error:", adminErr);
-      }
+      if (sessionError) throw new Error(sessionError.message || "Failed to create checkout");
+      if (!sessionData?.url) throw new Error("No checkout URL returned");
 
-      setShowSuccess(true);
+      // 3. Redirect to Stripe Checkout
+      window.location.href = sessionData.url;
     } catch (err: any) {
       toast({ title: "Order failed", description: err.message, variant: "destructive" });
-    } finally {
       setSubmitting(false);
     }
   };
@@ -142,37 +104,6 @@ const Customize = () => {
 
   return (
     <main className="pt-20 min-h-screen">
-      {/* Success Dialog */}
-      <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <div className="mx-auto mb-4">
-              <motion.div
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 0.5 }}
-                className="w-16 h-16 mx-auto bg-accent rounded-full flex items-center justify-center"
-              >
-                <Heart className="w-8 h-8 text-primary" />
-              </motion.div>
-            </div>
-            <DialogTitle className="text-center font-display text-2xl">
-              Thank You for Your Order!
-            </DialogTitle>
-            <DialogDescription className="text-center font-body text-base mt-2">
-              Our customer service team will reach out to you within 2 hours to confirm your cake details.
-            </DialogDescription>
-          </DialogHeader>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => { setShowSuccess(false); navigate("/"); }}
-            className="w-full bg-gradient-pink text-primary-foreground py-3 rounded-full font-body font-semibold shadow-pink mt-4"
-          >
-            Back to Home
-          </motion.button>
-        </DialogContent>
-      </Dialog>
-
       {/* Hero */}
       <section className="bg-gradient-dark py-20">
         <div className="container mx-auto px-4 text-center">

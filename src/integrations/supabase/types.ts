@@ -26,9 +26,12 @@ export type Database = {
           full_name: string
           id: string
           notes: string | null
+          payment_status: string
           phone_number: string
           size: string
           status: string
+          stripe_payment_intent_id: string | null
+          stripe_session_id: string | null
           user_id: string
         }
         Insert: {
@@ -42,9 +45,12 @@ export type Database = {
           full_name: string
           id?: string
           notes?: string | null
+          payment_status?: string
           phone_number: string
           size: string
           status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id: string
         }
         Update: {
@@ -58,9 +64,12 @@ export type Database = {
           full_name?: string
           id?: string
           notes?: string | null
+          payment_status?: string
           phone_number?: string
           size?: string
           status?: string
+          stripe_payment_intent_id?: string | null
+          stripe_session_id?: string | null
           user_id?: string
         }
         Relationships: []
@@ -94,7 +103,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_order_payment: {
+        Args: {
+          p_payment_intent_id: string
+          p_payment_status: string
+          p_stripe_session_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
