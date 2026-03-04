@@ -36,7 +36,14 @@ const Checkout = () => {
       if (error) throw new Error(error.message || "Checkout failed");
       if (!data?.url) throw new Error("No checkout URL returned");
 
-      window.location.href = data.url;
+      // Try direct navigation first, fall back to window.open for iframe contexts
+      const opened = window.open(data.url, "_self");
+      if (!opened) {
+        window.open(data.url, "_blank");
+      }
+
+      // Reset after a delay in case redirect doesn't happen (e.g. iframe sandbox)
+      setTimeout(() => setProcessing(false), 4000);
     } catch (err: any) {
       toast({ title: "Checkout failed", description: err.message, variant: "destructive" });
       setProcessing(false);
