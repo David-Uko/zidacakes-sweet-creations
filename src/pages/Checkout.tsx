@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ShoppingBag, Minus, Plus, X, ArrowLeft, CreditCard } from "lucide-react";
+import { ShoppingBag, Minus, Plus, X, ArrowLeft, CreditCard, ExternalLink } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,6 +13,7 @@ const Checkout = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [processing, setProcessing] = useState(false);
+  const [stripeUrl, setStripeUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -36,14 +37,12 @@ const Checkout = () => {
       if (error) throw new Error(error.message || "Checkout failed");
       if (!data?.url) throw new Error("No checkout URL returned");
 
-      // Try direct navigation first, fall back to window.open for iframe contexts
-      const opened = window.open(data.url, "_self");
-      if (!opened) {
-        window.open(data.url, "_blank");
-      }
+      // Store URL and try to redirect
+      setStripeUrl(data.url);
+      window.location.href = data.url;
 
-      // Reset after a delay in case redirect doesn't happen (e.g. iframe sandbox)
-      setTimeout(() => setProcessing(false), 4000);
+      // Reset after delay in case redirect is blocked (iframe/preview)
+      setTimeout(() => setProcessing(false), 3000);
     } catch (err: any) {
       toast({ title: "Checkout failed", description: err.message, variant: "destructive" });
       setProcessing(false);
@@ -143,16 +142,28 @@ const Checkout = () => {
                   </div>
                 </div>
 
-                <motion.button
-                  onClick={handleCheckout}
-                  disabled={processing}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full bg-gradient-pink text-primary-foreground py-4 rounded-full font-body font-semibold text-lg shadow-pink hover:shadow-pink-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <CreditCard className="w-5 h-5" />
-                  {processing ? "Processing..." : "Pay Now"}
-                </motion.button>
+                {stripeUrl ? (
+                  <a
+                    href={stripeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-gradient-pink text-primary-foreground py-4 rounded-full font-body font-semibold text-lg shadow-pink hover:shadow-pink-lg transition-all flex items-center justify-center gap-2"
+                  >
+                    <ExternalLink className="w-5 h-5" />
+                    Open Stripe Payment
+                  </a>
+                ) : (
+                  <motion.button
+                    onClick={handleCheckout}
+                    disabled={processing}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full bg-gradient-pink text-primary-foreground py-4 rounded-full font-body font-semibold text-lg shadow-pink hover:shadow-pink-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    <CreditCard className="w-5 h-5" />
+                    {processing ? "Processing..." : "Pay Now"}
+                  </motion.button>
+                )}
 
                 <p className="font-body text-xs text-muted-foreground text-center">
                   Secure payment powered by Stripe
