@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "@/contexts/CartContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
@@ -32,15 +33,15 @@ const App = () => (
             <Header />
             <CartDrawer />
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/shop" element={<Shop />} />
-              <Route path="/customize" element={<Customize />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/contact" element={<Contact />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/proposal" element={<Proposal />} />
-              <Route path="/checkout" element={<Checkout />} />
-              <Route path="/order-success" element={<OrderSuccess />} />
+              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/shop" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
+              <Route path="/customize" element={<ProtectedRoute><Customize /></ProtectedRoute>} />
+              <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
+              <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
+              <Route path="/proposal" element={<ProtectedRoute><Proposal /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+              <Route path="/order-success" element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Footer />
