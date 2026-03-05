@@ -47,108 +47,117 @@ Deno.serve(async (req) => {
         ? session.payment_intent
         : session.payment_intent?.id;
 
-    if (!orderId) {
-      console.error("No order_id in session metadata");
-      return new Response(JSON.stringify({ received: true }), { status: 200 });
+    // Update custom_orders if applicable
+    if (orderId) {
+      const { data: customOrder } = await supabase
+        .from("custom_orders")
+        .select("payment_status")
+        .eq("id", orderId)
+        .single();
+
+      if (customOrder && customOrder.payment_status !== "paid") {
+        await supabase
+          .from("custom_orders")
+          .update({
+            payment_status: "paid",
+            status: "confirmed",
+            stripe_payment_intent_id: paymentIntentId || null,
+            stripe_session_id: sessionId,
+          })
+          .eq("id", orderId);
+      }
     }
 
-    // Idempotency: check if already processed
-    const { data: existing } = await supabase
-      .from("custom_orders")
-      .select("payment_status")
-      .eq("id", orderId)
-      .single();
+    // Update orders table (cart orders)
+    if (orderId) {
+      const { data: cartOrder } = await supabase
+        .from("orders")
+        .select("id, payment_status, customer_email, customer_name, delivery_method, delivery_date, delivery_time, delivery_address, special_requests")
+        .eq("id", orderId)
+        .single();
 
-    if (existing?.payment_status === "paid") {
-      console.log("Order already marked as paid, skipping duplicate");
-      return new Response(JSON.stringify({ received: true }), { status: 200 });
-    }
+      if (cartOrder && cartOrder.payment_status !== "paid") {
+        await supabase
+          .from("orders")
+          .update({
+            payment_status: "paid",
+            status: "confirmed",
+            stripe_payment_intent_id: paymentIntentId || null,
+            stripe_session_id: sessionId,
+          })
+          .eq("id", orderId);
 
-    // Update order
-    const { error: updateError } = await supabase
-      .from("custom_orders")
-      .update({
-        payment_status: "paid",
-        status: "confirmed",
-        stripe_payment_intent_id: paymentIntentId || null,
-        stripe_session_id: sessionId,
-      })
-      .eq("id", orderId);
+        // Fetch order items
+        const { data: orderItems } = await supabase
+          .from("order_items")
+          .select("*")
+          .eq("order_id", orderId);
 
-    if (updateError) {
-      console.error("Failed to update order:", updateError);
-      return new Response("Database update failed", { status: 500 });
-    }
+        const itemsList = (orderItems || []).map((i: any) => `${i.product_name} x${i.quantity} — $${i.total_price}`).join("\n");
 
-    // Fetch full order for notifications
-    const { data: order } = await supabase
-      .from("custom_orders")
-      .select("*")
-      .eq("id", orderId)
-      .single();
-
-    if (order) {
-      // Send customer email via EmailJS
-      try {
-        const emailResponse = await fetch(
-          `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-customer-email`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-            },
-            body: JSON.stringify({
-              templateParams: {
-                to_email: order.email,
-                customer_name: order.full_name,
-                order_id: order.id,
-                cake_size: order.size,
-                cake_flavor: order.flavor,
-                cake_filling: order.filling,
-                delivery_method: order.delivery_method,
-                delivery_date: order.delivery_date || "To be confirmed",
+        // Send customer email
+        try {
+          await fetch(
+            `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-customer-email`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
               },
-            }),
-          }
-        );
-        await emailResponse.text();
-      } catch (e) {
-        console.error("Customer email failed:", e);
-      }
+              body: JSON.stringify({
+                templateParams: {
+                  to_email: cartOrder.customer_email,
+                  customer_name: cartOrder.customer_name,
+                  order_id: orderId,
+                  cake_size: "N/A",
+                  cake_flavor: itemsList || "Shop order",
+                  cake_filling: "N/A",
+                  delivery_method: cartOrder.delivery_method,
+                  delivery_date: cartOrder.delivery_date || "To be confirmed",
+                },
+              }),
+            }
+          );
+        } catch (e) {
+          console.error("Customer email failed:", e);
+        }
 
-      // Send admin notification via Web3Forms
-      try {
-        const adminResponse = await fetch(
-          `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-admin-notification`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-            },
-            body: JSON.stringify({
-              orderId: order.id,
-              fullName: order.full_name,
-              email: order.email,
-              phoneNumber: order.phone_number,
-              size: order.size,
-              flavor: order.flavor,
-              filling: order.filling,
-              color: order.color,
-              deliveryMethod: order.delivery_method,
-              deliveryDate: order.delivery_date || "Not specified",
-              notes: order.notes || "None",
-            }),
-          }
-        );
-        await adminResponse.text();
-      } catch (e) {
-        console.error("Admin notification failed:", e);
+        // Send admin notification
+        try {
+          await fetch(
+            `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-admin-notification`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+              },
+              body: JSON.stringify({
+                orderId,
+                fullName: cartOrder.customer_name,
+                email: cartOrder.customer_email,
+                phoneNumber: "",
+                size: "Shop Order",
+                flavor: itemsList || "Various items",
+                filling: "N/A",
+                color: "N/A",
+                deliveryMethod: cartOrder.delivery_method,
+                deliveryDate: `${cartOrder.delivery_date || "Not specified"} ${cartOrder.delivery_time || ""}`.trim(),
+                notes: [
+                  cartOrder.delivery_address ? `Address: ${cartOrder.delivery_address}` : "",
+                  cartOrder.special_requests ? `Special requests: ${cartOrder.special_requests}` : "",
+                ].filter(Boolean).join(" | ") || "None",
+              }),
+            }
+          );
+        } catch (e) {
+          console.error("Admin notification failed:", e);
+        }
       }
     }
 
-    console.log(`Order ${orderId} marked as paid successfully`);
+    console.log(`Order ${orderId} processed successfully`);
   }
 
   return new Response(JSON.stringify({ received: true }), {

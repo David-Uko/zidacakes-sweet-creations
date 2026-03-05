@@ -32,15 +32,8 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (secretKey.startsWith("pk_") || secretKey.startsWith("rk_")) {
-      return new Response(
-        JSON.stringify({ error: "Invalid Stripe key type. Need secret key (sk_*)." }),
-        { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
-      );
-    }
-
     const body = await req.json();
-    const { items, customerEmail } = body;
+    const { items, customerEmail, orderId, shippingCost } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return new Response(
@@ -49,7 +42,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Build line items from server-side catalog (ignore client prices)
+    // Build line items from server-side catalog
     const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
     for (const item of items) {
       const product = PRODUCT_CATALOG[item.id];
@@ -70,8 +63,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    const stripe = new Stripe(secretKey, { apiVersion: "2023-10-16" });
+    // Add shipping if applicable
+    if (shippingCost && shippingCost > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: { name: "Shipping (Postage)" },
+          unit_amount: shippingCost,
+        },
+        quantity: 1,
+      });
+    }
 
+    const stripe = new Stripe(secretKey, { apiVersion: "2023-10-16" });
     const origin = req.headers.get("origin") || req.headers.get("referer") || "https://localhost:5173";
 
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -79,6 +83,7 @@ Deno.serve(async (req) => {
       mode: "payment",
       success_url: `${origin}/order-success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/checkout?canceled=true`,
+      metadata: orderId ? { order_id: orderId } : undefined,
     };
 
     if (customerEmail) {
@@ -88,7 +93,7 @@ Deno.serve(async (req) => {
     const session = await stripe.checkout.sessions.create(sessionParams);
 
     return new Response(
-      JSON.stringify({ url: session.url }),
+      JSON.stringify({ url: session.url, sessionId: session.id }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
   } catch (error) {
