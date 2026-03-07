@@ -51,6 +51,13 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const { orderId, items, shippingCost } = body;
 
+    if (!orderId) {
+      return new Response(
+        JSON.stringify({ error: "Missing orderId" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     if (!items || !Array.isArray(items) || items.length === 0) {
       return new Response(
         JSON.stringify({ error: "Cart is empty" }),
@@ -79,17 +86,26 @@ Deno.serve(async (req) => {
       });
     }
 
-    const shipping = shippingCost || 0;
+    const shipping = Math.max(0, Number(shippingCost) || 0);
     total += shipping;
 
     const accessToken = await getPayPalAccessToken();
     const baseUrl = Deno.env.get("PAYPAL_BASE_URL") || "https://api-m.sandbox.paypal.com";
     const origin = req.headers.get("origin") || req.headers.get("referer") || "https://localhost:5173";
 
+    const originHeader = req.headers.get("origin");
+    const referer = req.headers.get("referer");
+    const origin = originHeader
+      ? originHeader
+      : referer
+        ? new URL(referer).origin
+        : "https://localhost:5173";
+
     const orderPayload = {
       intent: "CAPTURE",
       purchase_units: [{
-        reference_id: orderId || undefined,
+        reference_id: orderId,
+        custom_id: orderId,
         items: ppItems,
         amount: {
           currency_code: "USD",
@@ -101,7 +117,7 @@ Deno.serve(async (req) => {
         },
       }],
       application_context: {
-        return_url: `${origin}/order-success?paypal_order_id=PLACEHOLDER`,
+        return_url: `${origin}/order-success?order_id=${encodeURIComponent(orderId)}`,
         cancel_url: `${origin}/checkout?canceled=true`,
         brand_name: "Zidacakes'n'more",
         user_action: "PAY_NOW",
@@ -127,7 +143,6 @@ Deno.serve(async (req) => {
 
     if (!approveLink) throw new Error("No PayPal approval link");
 
-    // Replace placeholder in return URL
     const approvalUrl = approveLink.href;
 
     return new Response(
