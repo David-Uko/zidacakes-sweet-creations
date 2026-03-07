@@ -51,12 +51,13 @@ const OrderSuccess = () => {
           setConfirmedOrderId(data.orderId || orderIdFromQuery || null);
           setPaymentSummary(data.alreadyCaptured ? "PayPal payment already confirmed" : "PayPal payment confirmed");
         } else if (sessionId) {
-          const { data: order } = await supabase
+          const { data: orderData } = await supabase
             .from("orders" as any)
             .select("id,payment_status")
             .eq("stripe_session_id", sessionId)
             .maybeSingle();
 
+          const order = orderData as any;
           if (!mounted) return;
           setConfirmedOrderId(order?.id || null);
           setPaymentSummary(order?.payment_status === "paid" ? "Stripe payment confirmed" : "Stripe payment received");
