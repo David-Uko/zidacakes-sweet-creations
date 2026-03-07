@@ -17,8 +17,8 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -8 }}
-      className="group bg-card rounded-2xl overflow-hidden border border-border shadow-sm hover:shadow-pink transition-all duration-500"
+      whileHover={{ y: -10 }}
+      className="group interactive-lift bg-card rounded-2xl overflow-hidden border border-border shadow-sm hover:shadow-pink-lg transition-all duration-500 subtle-ring"
     >
       <div className="relative overflow-hidden aspect-square">
         <img
