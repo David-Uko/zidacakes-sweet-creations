@@ -130,6 +130,31 @@
   .glow-pink {
     box-shadow: 0 0 20px hsla(340, 82%, 52%, 0.3), 0 0 60px hsla(340, 82%, 52%, 0.1);
   }
+
+  .interactive-lift {
+    @apply transition-transform duration-300;
+  }
+
+  .interactive-lift:hover {
+    transform: translateY(-4px);
+  }
+
+  .soft-reveal {
+    @apply animate-fade-in;
+  }
+
+  .subtle-ring {
+    box-shadow: 0 0 0 1px hsl(var(--border)), 0 18px 48px -24px hsl(var(--primary) / 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Smooth scroll */

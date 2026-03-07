@@ -187,6 +187,56 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          order_id: string
+          payment_payload: Json | null
+          provider: string
+          provider_payment_id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          order_id: string
+          payment_payload?: Json | null
+          provider: string
+          provider_payment_id: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          order_id?: string
+          payment_payload?: Json | null
+          provider?: string
+          provider_payment_id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -208,6 +258,45 @@ export type Database = {
           id?: string
           phone_number?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          ai_response: string | null
+          created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          id: string
+          message: string
+          requires_human_followup: boolean
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_response?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          message: string
+          requires_human_followup?: boolean
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_response?: string | null
+          created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          id?: string
+          message?: string
+          requires_human_followup?: boolean
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

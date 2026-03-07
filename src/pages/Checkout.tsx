@@ -149,7 +149,12 @@ const Checkout = () => {
       });
 
       if (error) throw new Error(error.message || "PayPal checkout failed");
-      if (!data?.approvalUrl) throw new Error("No PayPal approval URL returned");
+      if (!data?.approvalUrl || !data?.paypalOrderId) throw new Error("No PayPal approval URL returned");
+
+      await supabase
+        .from("orders" as any)
+        .update({ paypal_order_id: data.paypalOrderId } as any)
+        .eq("id", order.id);
 
       setStripeUrl(data.approvalUrl);
       window.location.href = data.approvalUrl;
@@ -349,7 +354,7 @@ const Checkout = () => {
                   </button>
                   <button onClick={() => setPaymentMethod("paypal")}
                     className={`p-4 rounded-xl border-2 flex items-center gap-3 transition-all ${paymentMethod === "paypal" ? "border-primary bg-accent" : "border-border hover:border-primary/40"}`}>
-                    <span className="text-lg font-bold text-[#003087]">P</span>
+                    <span className="text-lg font-bold text-primary">P</span>
                     <div className="text-left">
                       <div className="font-body font-semibold text-sm">PayPal</div>
                       <div className="font-body text-xs text-muted-foreground">Pay with PayPal</div>

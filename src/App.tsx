@@ -9,6 +9,8 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
+import SupportWidget from "@/components/SupportWidget";
+import PageTransition from "@/components/PageTransition";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import Customize from "./pages/Customize";
@@ -32,17 +34,18 @@ const App = () => (
           <BrowserRouter>
             <Header />
             <CartDrawer />
+            <SupportWidget />
             <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-              <Route path="/shop" element={<ProtectedRoute><Shop /></ProtectedRoute>} />
-              <Route path="/customize" element={<ProtectedRoute><Customize /></ProtectedRoute>} />
-              <Route path="/about" element={<ProtectedRoute><About /></ProtectedRoute>} />
-              <Route path="/contact" element={<ProtectedRoute><Contact /></ProtectedRoute>} />
-              <Route path="/proposal" element={<ProtectedRoute><Proposal /></ProtectedRoute>} />
-              <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-              <Route path="/order-success" element={<ProtectedRoute><OrderSuccess /></ProtectedRoute>} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+              <Route path="/" element={<PageTransition><ProtectedRoute><Index /></ProtectedRoute></PageTransition>} />
+              <Route path="/shop" element={<PageTransition><ProtectedRoute><Shop /></ProtectedRoute></PageTransition>} />
+              <Route path="/customize" element={<PageTransition><ProtectedRoute><Customize /></ProtectedRoute></PageTransition>} />
+              <Route path="/about" element={<PageTransition><ProtectedRoute><About /></ProtectedRoute></PageTransition>} />
+              <Route path="/contact" element={<PageTransition><ProtectedRoute><Contact /></ProtectedRoute></PageTransition>} />
+              <Route path="/proposal" element={<PageTransition><ProtectedRoute><Proposal /></ProtectedRoute></PageTransition>} />
+              <Route path="/checkout" element={<PageTransition><ProtectedRoute><Checkout /></ProtectedRoute></PageTransition>} />
+              <Route path="/order-success" element={<PageTransition><ProtectedRoute><OrderSuccess /></ProtectedRoute></PageTransition>} />
+              <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
             </Routes>
             <Footer />
           </BrowserRouter>
