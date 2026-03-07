@@ -91,8 +91,6 @@ Deno.serve(async (req) => {
 
     const accessToken = await getPayPalAccessToken();
     const baseUrl = Deno.env.get("PAYPAL_BASE_URL") || "https://api-m.sandbox.paypal.com";
-    const origin = req.headers.get("origin") || req.headers.get("referer") || "https://localhost:5173";
-
     const originHeader = req.headers.get("origin");
     const referer = req.headers.get("referer");
     const origin = originHeader
