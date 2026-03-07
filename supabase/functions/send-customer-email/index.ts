@@ -15,6 +15,8 @@ Deno.serve(async (req) => {
     const publicKey = Deno.env.get('EMAILJS_PUBLIC_KEY');
     const privateKey = Deno.env.get('EMAILJS_PRIVATE_KEY');
 
+    console.log('EmailJS config check:', { serviceId: !!serviceId, templateId: !!templateId, publicKey: !!publicKey, privateKey: !!privateKey, privateKeyLength: privateKey?.length });
+
     if (!serviceId || !templateId || !publicKey) {
       throw new Error('EmailJS configuration missing');
     }
