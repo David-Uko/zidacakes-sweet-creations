@@ -72,7 +72,7 @@ Deno.serve(async (req) => {
     if (orderId) {
       const { data: cartOrder } = await supabase
         .from("orders")
-        .select("id, payment_status, customer_email, customer_name, delivery_method, delivery_date, delivery_time, delivery_address, special_requests")
+        .select("id, payment_status, customer_email, customer_name, customer_phone, payment_method, delivery_method, delivery_date, delivery_time, delivery_address, special_requests")
         .eq("id", orderId)
         .single();
 
@@ -90,14 +90,16 @@ Deno.serve(async (req) => {
         // Fetch order items
         const { data: orderItems } = await supabase
           .from("order_items")
-          .select("*")
+          .select("product_name, quantity, total_price")
           .eq("order_id", orderId);
 
-        const itemsList = (orderItems || []).map((i: any) => `${i.product_name} x${i.quantity} — $${i.total_price}`).join("\n");
+        const itemsList = (orderItems || []).map((i: any) => `${i.product_name} x${i.quantity} — $${Number(i.total_price).toFixed(2)}`).join("\n");
+        const totalQuantity = (orderItems || []).reduce((sum: number, item: any) => sum + Number(item.quantity || 0), 0);
+        const deliveryDateTime = `${cartOrder.delivery_date || "To be confirmed"}${cartOrder.delivery_time ? ` ${cartOrder.delivery_time}` : ""}`.trim();
 
         // Send customer email
         try {
-          await fetch(
+          const customerEmailResponse = await fetch(
             `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-customer-email`,
             {
               method: "POST",
@@ -108,24 +110,39 @@ Deno.serve(async (req) => {
               body: JSON.stringify({
                 templateParams: {
                   to_email: cartOrder.customer_email,
+                  email: cartOrder.customer_email,
+                  customer_email: cartOrder.customer_email,
                   customer_name: cartOrder.customer_name,
+                  name: cartOrder.customer_name,
+                  title: `Order Confirmation - ${orderId}`,
                   order_id: orderId,
+                  product_ordered: itemsList || "Shop order",
+                  quantity: totalQuantity || 1,
+                  items_list: itemsList || "Shop order",
+                  cake_type: itemsList || "Shop order",
                   cake_size: "N/A",
                   cake_flavor: itemsList || "Shop order",
                   cake_filling: "N/A",
                   delivery_method: cartOrder.delivery_method,
-                  delivery_date: cartOrder.delivery_date || "To be confirmed",
+                  delivery_date: deliveryDateTime,
+                  delivery_address: cartOrder.delivery_address || (cartOrder.delivery_method === "pickup" ? "Pickup" : "Not provided"),
+                  special_requests: cartOrder.special_requests || "None",
+                  payment_method: cartOrder.payment_method || "stripe",
                 },
               }),
             }
           );
+
+          if (!customerEmailResponse.ok) {
+            console.error("Customer email failed:", await customerEmailResponse.text());
+          }
         } catch (e) {
           console.error("Customer email failed:", e);
         }
 
         // Send admin notification
         try {
-          await fetch(
+          const adminNotificationResponse = await fetch(
             `${Deno.env.get("SUPABASE_URL")}/functions/v1/send-admin-notification`,
             {
               method: "POST",
@@ -137,13 +154,13 @@ Deno.serve(async (req) => {
                 orderId,
                 fullName: cartOrder.customer_name,
                 email: cartOrder.customer_email,
-                phoneNumber: "",
+                phoneNumber: cartOrder.customer_phone || "",
                 size: "Shop Order",
                 flavor: itemsList || "Various items",
                 filling: "N/A",
                 color: "N/A",
                 deliveryMethod: cartOrder.delivery_method,
-                deliveryDate: `${cartOrder.delivery_date || "Not specified"} ${cartOrder.delivery_time || ""}`.trim(),
+                deliveryDate: deliveryDateTime,
                 notes: [
                   cartOrder.delivery_address ? `Address: ${cartOrder.delivery_address}` : "",
                   cartOrder.special_requests ? `Special requests: ${cartOrder.special_requests}` : "",
@@ -151,6 +168,10 @@ Deno.serve(async (req) => {
               }),
             }
           );
+
+          if (!adminNotificationResponse.ok) {
+            console.error("Admin notification failed:", await adminNotificationResponse.text());
+          }
         } catch (e) {
           console.error("Admin notification failed:", e);
         }

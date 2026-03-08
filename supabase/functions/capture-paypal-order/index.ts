@@ -44,8 +44,11 @@ async function sendOrderNotifications(order: any, orderId: string, serviceRoleKe
     .map((i: any) => `${i.product_name} x${i.quantity} — $${Number(i.total_price).toFixed(2)}`)
     .join("\n");
 
+  const totalQuantity = (orderItems || []).reduce((sum: number, item: any) => sum + Number(item.quantity || 0), 0);
+  const deliveryDateTime = `${order.delivery_date || "To be confirmed"}${order.delivery_time ? ` ${order.delivery_time}` : ""}`.trim();
+
   try {
-    await fetch(`${supabaseUrl}/functions/v1/send-customer-email`, {
+    const customerEmailResponse = await fetch(`${supabaseUrl}/functions/v1/send-customer-email`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -54,22 +57,37 @@ async function sendOrderNotifications(order: any, orderId: string, serviceRoleKe
       body: JSON.stringify({
         templateParams: {
           to_email: order.customer_email,
+          email: order.customer_email,
+          customer_email: order.customer_email,
           customer_name: order.customer_name,
+          name: order.customer_name,
+          title: `Order Confirmation - ${orderId}`,
           order_id: orderId,
+          product_ordered: itemsList || "Shop order",
+          quantity: totalQuantity || 1,
+          items_list: itemsList || "Shop order",
+          cake_type: itemsList || "Shop order",
           cake_size: "N/A",
           cake_flavor: itemsList || "Shop order",
           cake_filling: "N/A",
           delivery_method: order.delivery_method,
-          delivery_date: order.delivery_date || "To be confirmed",
+          delivery_date: deliveryDateTime,
+          delivery_address: order.delivery_address || (order.delivery_method === "pickup" ? "Pickup" : "Not provided"),
+          special_requests: order.special_requests || "None",
+          payment_method: "PayPal",
         },
       }),
     });
+
+    if (!customerEmailResponse.ok) {
+      console.error("Customer email failed:", await customerEmailResponse.text());
+    }
   } catch (e) {
     console.error("Customer email failed:", e);
   }
 
   try {
-    await fetch(`${supabaseUrl}/functions/v1/send-admin-notification`, {
+    const adminEmailResponse = await fetch(`${supabaseUrl}/functions/v1/send-admin-notification`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -85,7 +103,7 @@ async function sendOrderNotifications(order: any, orderId: string, serviceRoleKe
         filling: "N/A",
         color: "N/A",
         deliveryMethod: order.delivery_method,
-        deliveryDate: `${order.delivery_date || "Not specified"} ${order.delivery_time || ""}`.trim(),
+        deliveryDate: deliveryDateTime,
         notes:
           [
             order.delivery_address ? `Address: ${order.delivery_address}` : "",
@@ -95,6 +113,10 @@ async function sendOrderNotifications(order: any, orderId: string, serviceRoleKe
             .join(" | ") || "None",
       }),
     });
+
+    if (!adminEmailResponse.ok) {
+      console.error("Admin notification failed:", await adminEmailResponse.text());
+    }
   } catch (e) {
     console.error("Admin notification failed:", e);
   }
