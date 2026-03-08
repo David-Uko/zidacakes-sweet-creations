@@ -60,6 +60,36 @@ const Auth = () => {
     setLoading(false);
   };
 
+  if (isForgot) {
+    return (
+      <main className="pt-20 min-h-screen flex items-center justify-center">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-4">
+          <div className="bg-card border border-border rounded-3xl p-8 shadow-pink">
+            <div className="text-center mb-8">
+              <Cake className="w-10 h-10 text-primary mx-auto mb-3" />
+              <h1 className="font-display text-2xl font-bold">Reset Password</h1>
+              <p className="font-body text-muted-foreground text-sm mt-1">Enter your email to receive a reset link</p>
+            </div>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="relative">
+                <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" required
+                  className="w-full pl-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              </div>
+              <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
+                className="w-full bg-gradient-pink text-primary-foreground py-3 rounded-full font-body font-semibold shadow-pink hover:shadow-pink-lg transition-all disabled:opacity-50">
+                {loading ? "Sending..." : "Send Reset Link"}
+              </motion.button>
+            </form>
+            <p className="text-center font-body text-sm text-muted-foreground mt-6">
+              <button onClick={() => setIsForgot(false)} className="text-primary font-medium hover:underline">Back to Sign In</button>
+            </p>
+          </div>
+        </motion.div>
+      </main>
+    );
+  }
+
   return (
     <main className="pt-20 min-h-screen flex items-center justify-center">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md mx-4">
@@ -92,6 +122,14 @@ const Auth = () => {
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required minLength={6}
                 className="w-full pl-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
+
+            {!isSignUp && (
+              <div className="text-right">
+                <button type="button" onClick={() => setIsForgot(true)} className="font-body text-xs text-primary hover:underline">
+                  Forgot Password?
+                </button>
+              </div>
+            )}
 
             <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
               className="w-full bg-gradient-pink text-primary-foreground py-3 rounded-full font-body font-semibold shadow-pink hover:shadow-pink-lg transition-all disabled:opacity-50">
