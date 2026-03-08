@@ -17,6 +17,7 @@ import Customize from "./pages/Customize";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Proposal from "./pages/Proposal";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
