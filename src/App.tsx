@@ -17,6 +17,7 @@ import Customize from "./pages/Customize";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Proposal from "./pages/Proposal";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
@@ -37,12 +38,13 @@ const App = () => (
             <SupportWidget />
             <Routes>
               <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
-              <Route path="/" element={<PageTransition><ProtectedRoute><Index /></ProtectedRoute></PageTransition>} />
-              <Route path="/shop" element={<PageTransition><ProtectedRoute><Shop /></ProtectedRoute></PageTransition>} />
-              <Route path="/customize" element={<PageTransition><ProtectedRoute><Customize /></ProtectedRoute></PageTransition>} />
-              <Route path="/about" element={<PageTransition><ProtectedRoute><About /></ProtectedRoute></PageTransition>} />
-              <Route path="/contact" element={<PageTransition><ProtectedRoute><Contact /></ProtectedRoute></PageTransition>} />
-              <Route path="/proposal" element={<PageTransition><ProtectedRoute><Proposal /></ProtectedRoute></PageTransition>} />
+              <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
+              <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+              <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
+              <Route path="/customize" element={<PageTransition><Customize /></PageTransition>} />
+              <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+              <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+              <Route path="/proposal" element={<PageTransition><Proposal /></PageTransition>} />
               <Route path="/checkout" element={<PageTransition><ProtectedRoute><Checkout /></ProtectedRoute></PageTransition>} />
               <Route path="/order-success" element={<PageTransition><ProtectedRoute><OrderSuccess /></ProtectedRoute></PageTransition>} />
               <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />

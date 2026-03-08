@@ -1,10 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Plus, Minus, ShoppingBag } from "lucide-react";
+import { X, Plus, Minus, ShoppingBag, LogIn } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 
 const CartDrawer = () => {
   const { items, isCartOpen, setIsCartOpen, removeFromCart, updateQuantity, totalPrice, totalItems } = useCart();
+  const { user } = useAuth();
 
   return (
     <AnimatePresence>
@@ -109,13 +111,30 @@ const CartDrawer = () => {
                   <span className="font-body font-medium">Total</span>
                   <span className="font-display text-2xl font-bold">${totalPrice.toFixed(2)}</span>
                 </div>
-                <Link
-                  to="/checkout"
-                  onClick={() => setIsCartOpen(false)}
-                  className="block w-full bg-gradient-pink text-primary-foreground text-center py-3 rounded-full font-body font-semibold hover:shadow-pink-lg transition-shadow"
-                >
-                  Checkout
-                </Link>
+                {user ? (
+                  <Link
+                    to="/checkout"
+                    onClick={() => setIsCartOpen(false)}
+                    className="block w-full bg-gradient-pink text-primary-foreground text-center py-3 rounded-full font-body font-semibold hover:shadow-pink-lg transition-shadow"
+                  >
+                    Checkout
+                  </Link>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-center font-body text-sm text-muted-foreground flex items-center justify-center gap-1">
+                      <LogIn className="w-4 h-4" />
+                      Please log in or create an account to place an order.
+                    </p>
+                    <Link
+                      to="/auth"
+                      state={{ from: "/checkout" }}
+                      onClick={() => setIsCartOpen(false)}
+                      className="block w-full bg-gradient-pink text-primary-foreground text-center py-3 rounded-full font-body font-semibold hover:shadow-pink-lg transition-shadow"
+                    >
+                      Sign In to Checkout
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
           </motion.div>
