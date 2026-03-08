@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ShoppingBag, Menu, X, User, LogOut } from "lucide-react";
+import { ShoppingBag, Menu, X, User, LogOut, Home } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,7 +23,8 @@ const Header = () => {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4 flex items-center justify-between h-16 md:h-20">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2" title="Go to Home">
+          <Home className="w-5 h-5 text-primary shrink-0" />
           <span className="font-display text-xl md:text-2xl font-bold tracking-tight">
             Zida<span className="text-primary">cakes</span>'n'more
           </span>
