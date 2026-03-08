@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [isForgot, setIsForgot] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -18,10 +19,24 @@ const Auth = () => {
 
   const from = (location.state as any)?.from || "/";
 
-  // If already logged in, redirect
   useEffect(() => {
     if (user) navigate(from, { replace: true });
   }, [user, navigate, from]);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) {
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Check your email", description: "We sent you a password reset link." });
+    }
+    setLoading(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
