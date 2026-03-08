@@ -22,27 +22,32 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         access_key: accessKey,
         subject: `New Custom Cake Order - ${orderData.orderId}`,
-        from_name: 'Zidacakes\'n\'more Orders',
+        from_name: "Zidacakes'n'more Orders",
         name: orderData.fullName,
         email: orderData.email,
         message: `
 New Custom Cake Order
 
 Order ID: ${orderData.orderId}
-Customer: ${orderData.fullName}
-Email: ${orderData.email}
-Phone: ${orderData.phoneNumber}
+Submitted: ${orderData.timestamp || new Date().toISOString()}
+
+Customer Details:
+- Name: ${orderData.fullName}
+- Email: ${orderData.email}
+- Phone: ${orderData.phoneNumber || 'Not provided'}
 
 Cake Details:
 - Size: ${orderData.size}
 - Flavor: ${orderData.flavor}
 - Filling: ${orderData.filling}
 - Color: ${orderData.color}
-- Delivery: ${orderData.deliveryMethod}
+- Delivery Method: ${orderData.deliveryMethod}
 - Delivery Date: ${orderData.deliveryDate || 'Not specified'}
-- Notes: ${orderData.notes || 'None'}
+- Special Instructions: ${orderData.notes || 'None'}
 
-Status: Order Placed
+Reference Image: ${orderData.referenceImageUrl || 'No image uploaded'}
+
+Status: Order Placed — Awaiting Review
         `.trim(),
       }),
     });
