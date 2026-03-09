@@ -213,7 +213,7 @@ const Checkout = () => {
                       <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl object-cover" />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-display font-semibold truncate text-sm">{item.name}</h3>
-                        <p className="text-primary font-body font-semibold text-sm mt-1">${item.price.toFixed(2)}</p>
+                        <p className="text-primary font-body font-semibold text-sm mt-1">£{item.price.toFixed(2)}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-accent transition-colors">
                             <Minus className="w-3 h-3" />
@@ -228,7 +228,7 @@ const Checkout = () => {
                         <button onClick={() => removeFromCart(item.id)} className="p-1 text-muted-foreground hover:text-destructive transition-colors">
                           <X className="w-4 h-4" />
                         </button>
-                        <span className="font-display font-bold text-sm">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-display font-bold text-sm">£{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     </motion.div>
                   ))}
@@ -286,7 +286,7 @@ const Checkout = () => {
                       <Truck className="w-5 h-5 text-primary" />
                       <div className="text-left">
                         <div className="font-body font-semibold text-sm">Postage</div>
-                        <div className="font-body text-xs text-muted-foreground">+ ${SHIPPING_COST.toFixed(2)}</div>
+                        <div className="font-body text-xs text-muted-foreground">+ £{SHIPPING_COST.toFixed(2)}</div>
                       </div>
                     </button>
                   </div>
@@ -389,7 +389,7 @@ const Checkout = () => {
                   {items.map((item) => (
                     <div key={item.id} className="flex justify-between font-body text-sm">
                       <span className="text-muted-foreground truncate mr-2">{item.name} × {item.quantity}</span>
-                      <span className="shrink-0">${(item.price * item.quantity).toFixed(2)}</span>
+                      <span className="shrink-0">£{(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>
@@ -397,15 +397,15 @@ const Checkout = () => {
                 <div className="border-t border-border pt-3 space-y-2">
                   <div className="flex justify-between font-body text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                    <span>£{totalPrice.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-body text-sm">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>{shippingCost === 0 ? <span className="text-primary font-medium">Free (Pickup)</span> : `$${shippingCost.toFixed(2)}`}</span>
+                    <span>{shippingCost === 0 ? <span className="text-primary font-medium">Free (Pickup)</span> : `£${shippingCost.toFixed(2)}`}</span>
                   </div>
                   <div className="border-t border-border pt-3 flex justify-between">
                     <span className="font-display font-bold text-lg">Total</span>
-                    <span className="font-display font-bold text-lg">${orderTotal.toFixed(2)}</span>
+                    <span className="font-display font-bold text-lg">£{orderTotal.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -420,7 +420,7 @@ const Checkout = () => {
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     className="w-full bg-gradient-pink text-primary-foreground py-4 rounded-full font-body font-semibold text-lg shadow-pink hover:shadow-pink-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                     {paymentMethod === "stripe" ? <CreditCard className="w-5 h-5" /> : <span className="font-bold">P</span>}
-                    {processing ? "Processing..." : `Pay $${orderTotal.toFixed(2)}`}
+                    {processing ? "Processing..." : `Pay £${orderTotal.toFixed(2)}`}
                   </motion.button>
                 )}
 

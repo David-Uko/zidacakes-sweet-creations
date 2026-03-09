@@ -41,7 +41,7 @@ async function sendOrderNotifications(order: any, orderId: string, serviceRoleKe
     .eq("order_id", orderId);
 
   const itemsList = (orderItems || [])
-    .map((i: any) => `${i.product_name} x${i.quantity} — $${Number(i.total_price).toFixed(2)}`)
+    .map((i: any) => `${i.product_name} x${i.quantity} — £${Number(i.total_price).toFixed(2)}`)
     .join("\n");
 
   const totalQuantity = (orderItems || []).reduce((sum: number, item: any) => sum + Number(item.quantity || 0), 0);
@@ -229,7 +229,7 @@ Deno.serve(async (req) => {
     const capture = captureData.purchase_units?.[0]?.payments?.captures?.[0];
     const paymentId = capture?.id || paypalOrderId;
     const amount = Number(capture?.amount?.value || captureData.purchase_units?.[0]?.amount?.value || 0);
-    const currency = capture?.amount?.currency_code || "USD";
+    const currency = capture?.amount?.currency_code || "GBP";
     const resolvedOrderId =
       existingOrder?.id || orderId || captureData.purchase_units?.[0]?.custom_id || captureData.purchase_units?.[0]?.reference_id;
 

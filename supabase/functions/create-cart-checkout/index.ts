@@ -55,7 +55,7 @@ Deno.serve(async (req) => {
       const quantity = Math.max(1, Math.min(99, Math.floor(Number(item.quantity) || 1)));
       lineItems.push({
         price_data: {
-          currency: "usd",
+          currency: "gbp",
           product_data: { name: product.name },
           unit_amount: product.priceCents,
         },
@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     if (shippingCost && shippingCost > 0) {
       lineItems.push({
         price_data: {
-          currency: "usd",
+          currency: "gbp",
           product_data: { name: "Shipping (Postage)" },
           unit_amount: shippingCost,
         },

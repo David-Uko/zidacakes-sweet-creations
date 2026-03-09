@@ -103,7 +103,7 @@ Deno.serve(async (req) => {
       line_items: [
         {
           price_data: {
-            currency: "usd",
+            currency: "gbp",
             product_data: {
               name: `Custom Cake Order - ${order.size} ${order.flavor}`,
               description: `Filling: ${order.filling} | Delivery: ${order.delivery_method}`,

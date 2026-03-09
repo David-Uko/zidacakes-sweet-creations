@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       provider: "stripe",
       provider_payment_id: paymentIntentId || sessionId,
       amount,
-      currency: session.currency || "usd",
+      currency: session.currency || "gbp",
       status: "paid",
       payment_payload: session as any,
     }, { onConflict: "provider,provider_payment_id" });
@@ -126,7 +126,7 @@ Deno.serve(async (req) => {
       .eq("order_id", orderId);
 
     const itemsList = (orderItems || [])
-      .map((i: any) => `${i.product_name} x${i.quantity} — $${Number(i.total_price).toFixed(2)}`)
+      .map((i: any) => `${i.product_name} x${i.quantity} — £${Number(i.total_price).toFixed(2)}`)
       .join("\n");
     const totalQuantity = (orderItems || []).reduce((sum: number, item: any) => sum + Number(item.quantity || 0), 0);
     const deliveryDateTime = `${existingOrder.delivery_date || "To be confirmed"}${existingOrder.delivery_time ? ` ${existingOrder.delivery_time}` : ""}`.trim();
