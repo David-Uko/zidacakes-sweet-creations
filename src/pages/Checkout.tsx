@@ -286,7 +286,7 @@ const Checkout = () => {
                       <Truck className="w-5 h-5 text-primary" />
                       <div className="text-left">
                         <div className="font-body font-semibold text-sm">Postage</div>
-                        <div className="font-body text-xs text-muted-foreground">+ ${SHIPPING_COST.toFixed(2)}</div>
+                        <div className="font-body text-xs text-muted-foreground">+ £{SHIPPING_COST.toFixed(2)}</div>
                       </div>
                     </button>
                   </div>
