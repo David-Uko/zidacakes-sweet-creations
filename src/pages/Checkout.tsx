@@ -254,6 +254,21 @@ const Checkout = () => {
                   </div>
                 </div>
 
+                {/* Cake Size */}
+                <div>
+                  <label className="font-body text-sm text-muted-foreground mb-1 block">Cake Size</label>
+                  <select value={cakeSize} onChange={(e) => setCakeSize(e.target.value)}
+                    className="w-full p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                    <option value="">Select size (optional)</option>
+                    <option value="6 inch (serves 8-10)">6 inch (serves 8-10)</option>
+                    <option value="8 inch (serves 12-16)">8 inch (serves 12-16)</option>
+                    <option value="10 inch (serves 20-24)">10 inch (serves 20-24)</option>
+                    <option value="12 inch (serves 30-36)">12 inch (serves 30-36)</option>
+                    <option value="Cupcakes">Cupcakes</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
                 {/* Delivery Method */}
                 <div>
                   <label className="font-body text-sm text-muted-foreground mb-2 block">Delivery Method *</label>
