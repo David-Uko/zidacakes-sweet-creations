@@ -338,6 +338,25 @@ const Index = () => {
           </motion.div>
         </div>
       </section>
+
+      {/* Allergy Notice */}
+      <section className="py-8 bg-accent/50 border-t border-border">
+        <div className="container mx-auto px-4">
+          <div className="flex items-start gap-3 max-w-3xl mx-auto text-center sm:text-left">
+            <div className="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center mt-0.5">
+              <AlertTriangle className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="font-display text-sm font-bold uppercase tracking-wider mb-1">Allergy Information</h3>
+              <p className="font-body text-xs text-muted-foreground leading-relaxed">
+                Our products are made in an environment that handles <strong className="text-foreground">nuts, dairy, eggs, gluten, and soy</strong>. 
+                Whilst we take every precaution, we cannot guarantee that any of our products are free from these allergens. 
+                If you have a severe allergy, please <Link to="/contact" className="text-primary underline underline-offset-2 hover:text-primary/80">contact us</Link> before ordering.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </main>);
 
 };
