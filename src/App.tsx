@@ -11,6 +11,7 @@ import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
 import SupportWidget from "@/components/SupportWidget";
 import PageTransition from "@/components/PageTransition";
+import { ScrollToTop } from "@/components/ScrollToTop";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
 import Customize from "./pages/Customize";
