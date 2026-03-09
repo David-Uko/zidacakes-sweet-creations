@@ -213,7 +213,7 @@ const Checkout = () => {
                       <img src={item.image} alt={item.name} className="w-20 h-20 rounded-xl object-cover" />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-display font-semibold truncate text-sm">{item.name}</h3>
-                        <p className="text-primary font-body font-semibold text-sm mt-1">${item.price.toFixed(2)}</p>
+                        <p className="text-primary font-body font-semibold text-sm mt-1">£{item.price.toFixed(2)}</p>
                         <div className="flex items-center gap-2 mt-2">
                           <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-7 h-7 rounded-full border border-border flex items-center justify-center hover:bg-accent transition-colors">
                             <Minus className="w-3 h-3" />
