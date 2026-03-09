@@ -109,7 +109,7 @@ const CartDrawer = () => {
               <div className="p-6 border-t border-border space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="font-body font-medium">Total</span>
-                  <span className="font-display text-2xl font-bold">${totalPrice.toFixed(2)}</span>
+                  <span className="font-display text-2xl font-bold">£{totalPrice.toFixed(2)}</span>
                 </div>
                 {user ? (
                   <Link

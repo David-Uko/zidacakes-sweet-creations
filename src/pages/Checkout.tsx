@@ -420,7 +420,7 @@ const Checkout = () => {
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
                     className="w-full bg-gradient-pink text-primary-foreground py-4 rounded-full font-body font-semibold text-lg shadow-pink hover:shadow-pink-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50">
                     {paymentMethod === "stripe" ? <CreditCard className="w-5 h-5" /> : <span className="font-bold">P</span>}
-                    {processing ? "Processing..." : `Pay $${orderTotal.toFixed(2)}`}
+                    {processing ? "Processing..." : `Pay £${orderTotal.toFixed(2)}`}
                   </motion.button>
                 )}
 

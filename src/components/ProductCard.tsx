@@ -43,7 +43,7 @@ const ProductCard = ({ product, index = 0 }: ProductCardProps) => {
         <h3 className="font-display font-semibold text-lg mb-2 line-clamp-1">{product.name}</h3>
         <p className="text-muted-foreground text-sm font-body line-clamp-2 mb-3">{product.description}</p>
         <div className="flex items-center justify-between">
-          <span className="font-display text-xl font-bold">${product.price.toFixed(2)}</span>
+          <span className="font-display text-xl font-bold">£{product.price.toFixed(2)}</span>
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 fill-primary text-primary" />
             <span className="text-sm font-body font-medium">{product.rating}</span>

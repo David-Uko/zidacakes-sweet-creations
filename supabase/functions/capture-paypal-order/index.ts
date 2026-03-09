@@ -229,7 +229,7 @@ Deno.serve(async (req) => {
     const capture = captureData.purchase_units?.[0]?.payments?.captures?.[0];
     const paymentId = capture?.id || paypalOrderId;
     const amount = Number(capture?.amount?.value || captureData.purchase_units?.[0]?.amount?.value || 0);
-    const currency = capture?.amount?.currency_code || "USD";
+    const currency = capture?.amount?.currency_code || "GBP";
     const resolvedOrderId =
       existingOrder?.id || orderId || captureData.purchase_units?.[0]?.custom_id || captureData.purchase_units?.[0]?.reference_id;
 

@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       provider: "stripe",
       provider_payment_id: paymentIntentId || sessionId,
       amount,
-      currency: session.currency || "usd",
+      currency: session.currency || "gbp",
       status: "paid",
       payment_payload: session as any,
     }, { onConflict: "provider,provider_payment_id" });
