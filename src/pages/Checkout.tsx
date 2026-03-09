@@ -397,7 +397,7 @@ const Checkout = () => {
                 <div className="border-t border-border pt-3 space-y-2">
                   <div className="flex justify-between font-body text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span>${totalPrice.toFixed(2)}</span>
+                    <span>£{totalPrice.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-body text-sm">
                     <span className="text-muted-foreground">Shipping</span>
