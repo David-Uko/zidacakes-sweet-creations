@@ -401,7 +401,7 @@ const Checkout = () => {
                   </div>
                   <div className="flex justify-between font-body text-sm">
                     <span className="text-muted-foreground">Shipping</span>
-                    <span>{shippingCost === 0 ? <span className="text-primary font-medium">Free (Pickup)</span> : `$${shippingCost.toFixed(2)}`}</span>
+                    <span>{shippingCost === 0 ? <span className="text-primary font-medium">Free (Pickup)</span> : `£${shippingCost.toFixed(2)}`}</span>
                   </div>
                   <div className="border-t border-border pt-3 flex justify-between">
                     <span className="font-display font-bold text-lg">Total</span>
