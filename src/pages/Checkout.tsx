@@ -31,6 +31,7 @@ const Checkout = () => {
   const [specialRequests, setSpecialRequests] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [cakeSize, setCakeSize] = useState("");
 
   const shippingCost = deliveryMethod === "postage" ? SHIPPING_COST : 0;
   const orderTotal = totalPrice + shippingCost;
