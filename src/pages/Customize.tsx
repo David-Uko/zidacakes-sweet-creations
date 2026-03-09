@@ -138,6 +138,31 @@ const Customize = () => {
         },
       });
 
+      // Send customer confirmation email via EmailJS (custom cake template)
+      try {
+        await supabase.functions.invoke("send-custom-cake-email", {
+          body: {
+            templateParams: {
+              to_email: email,
+              email: email,
+              customer_email: email,
+              customer_name: fullName,
+              name: fullName,
+              order_id: order.id,
+              cake_size: size,
+              cake_flavor: flavor,
+              cake_filling: filling,
+              cake_color: color,
+              delivery_method: delivery,
+              delivery_date: deliveryDate || "Not specified",
+              special_requests: notes || "None",
+            },
+          },
+        });
+      } catch (emailErr) {
+        console.error("Custom cake confirmation email failed:", emailErr);
+      }
+
       // Show confirmation popup
       setShowConfirmation(true);
 

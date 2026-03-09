@@ -1,14 +1,41 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Send, Clock, Instagram, Facebook, Twitter } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const Contact = () => {
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      toast({ title: "Please fill in all required fields", variant: "destructive" });
+      return;
+    }
+
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("send-contact-form", {
+        body: {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          subject: formData.subject.trim(),
+          message: formData.message.trim(),
+        },
+      });
+
+      if (error) throw new Error(error.message || "Failed to send message");
+
+      setSubmitted(true);
+    } catch (err: any) {
+      toast({ title: "Failed to send message", description: err.message, variant: "destructive" });
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -47,7 +74,7 @@ const Contact = () => {
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
-                      <label className="font-body text-sm font-medium mb-2 block">Full Name</label>
+                      <label className="font-body text-sm font-medium mb-2 block">Full Name *</label>
                       <input
                         type="text"
                         required
@@ -58,7 +85,7 @@ const Contact = () => {
                       />
                     </div>
                     <div>
-                      <label className="font-body text-sm font-medium mb-2 block">Email</label>
+                      <label className="font-body text-sm font-medium mb-2 block">Email *</label>
                       <input
                         type="email"
                         required
@@ -80,7 +107,7 @@ const Contact = () => {
                     />
                   </div>
                   <div>
-                    <label className="font-body text-sm font-medium mb-2 block">Message</label>
+                    <label className="font-body text-sm font-medium mb-2 block">Message *</label>
                     <textarea
                       required
                       value={formData.message}
@@ -92,11 +119,12 @@ const Contact = () => {
                   </div>
                   <motion.button
                     type="submit"
+                    disabled={sending}
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
-                    className="w-full bg-gradient-pink text-primary-foreground py-3.5 rounded-full font-body font-semibold shadow-pink hover:shadow-pink-lg transition-all flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-pink text-primary-foreground py-3.5 rounded-full font-body font-semibold shadow-pink hover:shadow-pink-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                   >
-                    <Send className="w-4 h-4" /> Send Message
+                    <Send className="w-4 h-4" /> {sending ? "Sending..." : "Send Message"}
                   </motion.button>
                 </form>
               )}

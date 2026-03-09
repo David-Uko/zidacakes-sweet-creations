@@ -31,6 +31,7 @@ const Checkout = () => {
   const [specialRequests, setSpecialRequests] = useState("");
   const [customerName, setCustomerName] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
+  const [cakeSize, setCakeSize] = useState("");
 
   const shippingCost = deliveryMethod === "postage" ? SHIPPING_COST : 0;
   const orderTotal = totalPrice + shippingCost;
@@ -75,7 +76,7 @@ const Checkout = () => {
         delivery_date: deliveryDate || null,
         delivery_time: deliveryTime || null,
         delivery_address: fullAddress,
-        special_requests: specialRequests.trim() || null,
+        special_requests: [cakeSize ? `Cake Size: ${cakeSize}` : "", specialRequests.trim()].filter(Boolean).join(" | ") || null,
         payment_method: paymentMethodUsed,
         subtotal: totalPrice,
         shipping_cost: shippingCost,
@@ -251,6 +252,21 @@ const Checkout = () => {
                     <input type="tel" value={customerPhone} onChange={(e) => setCustomerPhone(e.target.value)} placeholder="Phone number"
                       className="w-full p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
                   </div>
+                </div>
+
+                {/* Cake Size */}
+                <div>
+                  <label className="font-body text-sm text-muted-foreground mb-1 block">Cake Size</label>
+                  <select value={cakeSize} onChange={(e) => setCakeSize(e.target.value)}
+                    className="w-full p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30">
+                    <option value="">Select size (optional)</option>
+                    <option value="6 inch (serves 8-10)">6 inch (serves 8-10)</option>
+                    <option value="8 inch (serves 12-16)">8 inch (serves 12-16)</option>
+                    <option value="10 inch (serves 20-24)">10 inch (serves 20-24)</option>
+                    <option value="12 inch (serves 30-36)">12 inch (serves 30-36)</option>
+                    <option value="Cupcakes">Cupcakes</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
 
                 {/* Delivery Method */}
