@@ -81,7 +81,7 @@ Deno.serve(async (req) => {
       total += itemTotal;
       ppItems.push({
         name: product.name,
-        unit_amount: { currency_code: "USD", value: product.price.toFixed(2) },
+        unit_amount: { currency_code: "GBP", value: product.price.toFixed(2) },
         quantity: String(qty),
       });
     }
