@@ -76,7 +76,7 @@ const Checkout = () => {
         delivery_date: deliveryDate || null,
         delivery_time: deliveryTime || null,
         delivery_address: fullAddress,
-        special_requests: specialRequests.trim() || null,
+        special_requests: [cakeSize ? `Cake Size: ${cakeSize}` : "", specialRequests.trim()].filter(Boolean).join(" | ") || null,
         payment_method: paymentMethodUsed,
         subtotal: totalPrice,
         shipping_cost: shippingCost,
