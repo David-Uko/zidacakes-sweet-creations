@@ -116,7 +116,7 @@ const SupportWidget = () => {
                 <h2 className="font-display text-lg font-semibold">Customer Support</h2>
               </div>
               <p className="font-body text-xs text-muted-foreground mt-1">
-                {user?.email ? `Signed in as ${user.email}` : "Ask us anything about your order."}
+                {user ? "Signed in as zidacakes@gmail.com" : "Ask us anything about your order."}
               </p>
             </header>
 
