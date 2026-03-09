@@ -405,7 +405,7 @@ const Checkout = () => {
                   </div>
                   <div className="border-t border-border pt-3 flex justify-between">
                     <span className="font-display font-bold text-lg">Total</span>
-                    <span className="font-display font-bold text-lg">${orderTotal.toFixed(2)}</span>
+                    <span className="font-display font-bold text-lg">£{orderTotal.toFixed(2)}</span>
                   </div>
                 </div>
 
