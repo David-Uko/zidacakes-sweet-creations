@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
     if (shippingCost && shippingCost > 0) {
       lineItems.push({
         price_data: {
-          currency: "usd",
+          currency: "gbp",
           product_data: { name: "Shipping (Postage)" },
           unit_amount: shippingCost,
         },

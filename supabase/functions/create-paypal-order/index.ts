@@ -106,11 +106,11 @@ Deno.serve(async (req) => {
         custom_id: orderId,
         items: ppItems,
         amount: {
-          currency_code: "USD",
+          currency_code: "GBP",
           value: total.toFixed(2),
           breakdown: {
-            item_total: { currency_code: "USD", value: (total - shipping).toFixed(2) },
-            shipping: { currency_code: "USD", value: shipping.toFixed(2) },
+            item_total: { currency_code: "GBP", value: (total - shipping).toFixed(2) },
+            shipping: { currency_code: "GBP", value: shipping.toFixed(2) },
           },
         },
       }],

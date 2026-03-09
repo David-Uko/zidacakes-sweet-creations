@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { ArrowRight, Truck, Leaf, Palette, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Truck, Leaf, Palette, Star, ChevronLeft, ChevronRight, AlertTriangle } from "lucide-react";
 import { useState } from "react";
 import { products } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
