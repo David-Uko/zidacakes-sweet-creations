@@ -228,7 +228,7 @@ const Checkout = () => {
                         <button onClick={() => removeFromCart(item.id)} className="p-1 text-muted-foreground hover:text-destructive transition-colors">
                           <X className="w-4 h-4" />
                         </button>
-                        <span className="font-display font-bold text-sm">${(item.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-display font-bold text-sm">£{(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     </motion.div>
                   ))}
