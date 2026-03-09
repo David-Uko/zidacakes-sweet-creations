@@ -41,7 +41,7 @@ async function sendOrderNotifications(order: any, orderId: string, serviceRoleKe
     .eq("order_id", orderId);
 
   const itemsList = (orderItems || [])
-    .map((i: any) => `${i.product_name} x${i.quantity} — $${Number(i.total_price).toFixed(2)}`)
+    .map((i: any) => `${i.product_name} x${i.quantity} — £${Number(i.total_price).toFixed(2)}`)
     .join("\n");
 
   const totalQuantity = (orderItems || []).reduce((sum: number, item: any) => sum + Number(item.quantity || 0), 0);
