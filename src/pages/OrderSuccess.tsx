@@ -51,16 +51,18 @@ const OrderSuccess = () => {
           setConfirmedOrderId(data.orderId || orderIdFromQuery || null);
           setPaymentSummary(data.alreadyCaptured ? "PayPal payment already confirmed" : "PayPal payment confirmed");
         } else if (sessionId) {
-          const { data: orderData } = await supabase
-            .from("orders" as any)
-            .select("id,payment_status")
-            .eq("stripe_session_id", sessionId)
-            .maybeSingle();
+          // Verify Stripe payment and trigger emails server-side
+          const { data, error } = await supabase.functions.invoke("verify-stripe-payment", {
+            body: { sessionId },
+          });
 
-          const order = orderData as any;
+          if (error || !data?.success) {
+            throw new Error(data?.error || error?.message || "Unable to verify Stripe payment");
+          }
+
           if (!mounted) return;
-          setConfirmedOrderId(order?.id || null);
-          setPaymentSummary(order?.payment_status === "paid" ? "Stripe payment confirmed" : "Stripe payment received");
+          setConfirmedOrderId(data.orderId || null);
+          setPaymentSummary(data.alreadyProcessed ? "Stripe payment already confirmed" : "Stripe payment confirmed");
         }
 
         clearCart();
