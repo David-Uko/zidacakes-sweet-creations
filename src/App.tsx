@@ -23,6 +23,10 @@ import ResetPassword from "./pages/ResetPassword";
 import Proposal from "./pages/Proposal";
 import Checkout from "./pages/Checkout";
 import OrderSuccess from "./pages/OrderSuccess";
+import Courses from "./pages/Courses";
+import CourseContent from "./pages/CourseContent";
+import CourseSuccess from "./pages/CourseSuccess";
+import MyCourses from "./pages/MyCourses";
 import NotFound from "./pages/NotFound";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -69,6 +73,10 @@ const App = () => (
                     <Route path="/about" element={<PageTransition><About /></PageTransition>} />
                     <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
                     <Route path="/proposal" element={<PageTransition><Proposal /></PageTransition>} />
+                    <Route path="/courses" element={<PageTransition><Courses /></PageTransition>} />
+                    <Route path="/courses/:courseId" element={<PageTransition><ProtectedRoute><CourseContent /></ProtectedRoute></PageTransition>} />
+                    <Route path="/course-success" element={<PageTransition><ProtectedRoute><CourseSuccess /></ProtectedRoute></PageTransition>} />
+                    <Route path="/my-courses" element={<PageTransition><ProtectedRoute><MyCourses /></ProtectedRoute></PageTransition>} />
                     <Route path="/checkout" element={<PageTransition><ProtectedRoute><Checkout /></ProtectedRoute></PageTransition>} />
                     <Route path="/order-success" element={<PageTransition><ProtectedRoute><OrderSuccess /></ProtectedRoute></PageTransition>} />
                     <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
