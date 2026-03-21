@@ -14,6 +14,95 @@ export type Database = {
   }
   public: {
     Tables: {
+      course_lessons: {
+        Row: {
+          content: string | null
+          course_id: string
+          created_at: string
+          id: string
+          sort_order: number
+          title: string
+          video_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          course_id: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          title: string
+          video_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          course_id?: string
+          created_at?: string
+          id?: string
+          sort_order?: number
+          title?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_lessons_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          category: string
+          created_at: string
+          currency: string
+          description: string
+          duration: string | null
+          id: string
+          image_url: string | null
+          is_mentorship: boolean
+          learning_points: Json | null
+          price: number
+          published: boolean
+          telegram_link: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          currency?: string
+          description: string
+          duration?: string | null
+          id?: string
+          image_url?: string | null
+          is_mentorship?: boolean
+          learning_points?: Json | null
+          price?: number
+          published?: boolean
+          telegram_link?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          currency?: string
+          description?: string
+          duration?: string | null
+          id?: string
+          image_url?: string | null
+          is_mentorship?: boolean
+          learning_points?: Json | null
+          price?: number
+          published?: boolean
+          telegram_link?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       custom_orders: {
         Row: {
           color: string
@@ -300,6 +389,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_courses: {
+        Row: {
+          course_id: string
+          id: string
+          payment_status: string
+          paypal_order_id: string | null
+          purchased_at: string
+          stripe_session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          id?: string
+          payment_status?: string
+          paypal_order_id?: string | null
+          purchased_at?: string
+          stripe_session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          id?: string
+          payment_status?: string
+          paypal_order_id?: string | null
+          purchased_at?: string
+          stripe_session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_courses_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           id: string
@@ -388,6 +515,10 @@ export type Database = {
       admin_update_order_status: {
         Args: { p_order_id: string; p_status: string }
         Returns: undefined
+      }
+      has_course_access: {
+        Args: { _course_id: string; _user_id: string }
+        Returns: boolean
       }
       has_role: {
         Args: {
