@@ -13,9 +13,34 @@ const CourseSuccess = () => {
 
   const sessionId = searchParams.get("session_id");
   const courseId = searchParams.get("course_id");
+  const isPayPal = searchParams.get("paypal") === "true";
+  const paypalToken = searchParams.get("token"); // PayPal returns token param
 
   useEffect(() => {
     const verify = async () => {
+      if (isPayPal && courseId && paypalToken) {
+        // PayPal flow: capture the order
+        try {
+          const { data, error: fnError } = await supabase.functions.invoke("capture-course-paypal-order", {
+            body: { paypalOrderId: paypalToken, courseId },
+          });
+
+          if (fnError) throw fnError;
+          if (data?.success) {
+            setCourseName(data.courseName || "your course");
+          } else {
+            setError(data?.error || "PayPal payment verification failed.");
+          }
+        } catch (err: any) {
+          setError("Failed to verify PayPal payment. Please contact support.");
+          console.error(err);
+        } finally {
+          setVerifying(false);
+        }
+        return;
+      }
+
+      // Stripe flow
       if (!sessionId || !courseId) {
         setError("Missing payment information.");
         setVerifying(false);
@@ -42,7 +67,7 @@ const CourseSuccess = () => {
     };
 
     verify();
-  }, [sessionId, courseId]);
+  }, [sessionId, courseId, isPayPal, paypalToken]);
 
   if (verifying) {
     return (
