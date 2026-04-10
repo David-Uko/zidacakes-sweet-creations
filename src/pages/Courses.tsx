@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { BookOpen, Clock, ChevronRight, GraduationCap, Users, Sparkles, Crown, Video, MessageCircle, Shield } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BookOpen, Clock, ChevronRight, GraduationCap, Users, Sparkles, Crown, Video, MessageCircle, Shield, CreditCard, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,6 +13,7 @@ const Courses = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [enrollingId, setEnrollingId] = useState<string | null>(null);
+  const [paymentModal, setPaymentModal] = useState<{ courseId: string; title: string } | null>(null);
 
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ["courses"],
@@ -45,7 +46,7 @@ const Courses = () => {
     userCourses.filter((uc) => uc.payment_status === "paid").map((uc) => uc.course_id)
   );
 
-  const handleEnroll = async (courseId: string) => {
+  const handleEnroll = (courseId: string, courseTitle: string) => {
     if (!user) {
       navigate("/auth", { state: { from: "/courses" } });
       return;
@@ -56,6 +57,11 @@ const Courses = () => {
       return;
     }
 
+    setPaymentModal({ courseId, title: courseTitle });
+  };
+
+  const handleStripePayment = async (courseId: string) => {
+    setPaymentModal(null);
     setEnrollingId(courseId);
     try {
       const { data, error } = await supabase.functions.invoke("create-course-checkout", {
@@ -67,6 +73,25 @@ const Courses = () => {
       }
     } catch (err: any) {
       toast.error("Failed to start checkout. Please try again.");
+      console.error(err);
+    } finally {
+      setEnrollingId(null);
+    }
+  };
+
+  const handlePayPalPayment = async (courseId: string) => {
+    setPaymentModal(null);
+    setEnrollingId(courseId);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-course-paypal-order", {
+        body: { courseId },
+      });
+      if (error) throw error;
+      if (data?.approvalUrl) {
+        window.location.href = data.approvalUrl;
+      }
+    } catch (err: any) {
+      toast.error("Failed to start PayPal checkout. Please try again.");
       console.error(err);
     } finally {
       setEnrollingId(null);
@@ -279,7 +304,7 @@ const Courses = () => {
                         </div>
                         <Button
                           size="lg"
-                          onClick={() => handleEnroll(course.id)}
+                          onClick={() => handleEnroll(course.id, course.title)}
                           disabled={enrollingId === course.id}
                           className={`min-w-[160px] font-semibold rounded-xl transition-all duration-300 ${
                             isPurchased
@@ -306,6 +331,68 @@ const Courses = () => {
           )}
         </div>
       </section>
+
+      {/* Payment Method Modal */}
+      <AnimatePresence>
+        {paymentModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+            onClick={() => setPaymentModal(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              transition={{ type: "spring", duration: 0.5 }}
+              className="bg-card border border-border rounded-2xl shadow-2xl w-full max-w-md p-6 md:p-8 relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setPaymentModal(null)}
+                className="absolute top-4 right-4 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="text-center mb-6">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                  <CreditCard className="w-7 h-7 text-primary" />
+                </div>
+                <h3 className="font-display text-xl font-bold mb-1">Choose Payment Method</h3>
+                <p className="text-sm text-muted-foreground">
+                  Select how you'd like to pay for <strong>{paymentModal.title}</strong>
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={() => handleStripePayment(paymentModal.courseId)}
+                  className="w-full h-14 text-base font-semibold rounded-xl bg-[#635BFF] hover:bg-[#5851DB] text-white gap-3"
+                >
+                  <CreditCard className="w-5 h-5" />
+                  Pay with Card (Stripe)
+                </Button>
+                <Button
+                  onClick={() => handlePayPalPayment(paymentModal.courseId)}
+                  className="w-full h-14 text-base font-semibold rounded-xl bg-[#0070BA] hover:bg-[#005EA6] text-white gap-3"
+                >
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.77.77 0 0 1 .757-.654h6.803c2.261 0 3.856.58 4.74 1.724.392.508.65 1.063.77 1.66.126.63.085 1.385-.12 2.302l-.004.018v.46l.357.183c.3.147.54.314.726.5.332.33.547.75.639 1.243.094.507.06 1.107-.1 1.784-.183.778-.48 1.458-.883 2.023a4.225 4.225 0 0 1-1.378 1.248c-.53.32-1.145.558-1.833.707a9.585 9.585 0 0 1-2.233.25h-.53a1.591 1.591 0 0 0-1.573 1.342l-.04.213-.665 4.216-.03.155a.16.16 0 0 1-.158.135H7.076z" />
+                  </svg>
+                  Pay with PayPal
+                </Button>
+              </div>
+
+              <p className="text-xs text-muted-foreground text-center mt-4">
+                All payments are secure and encrypted
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 };
