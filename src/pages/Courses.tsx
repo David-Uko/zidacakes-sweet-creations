@@ -304,7 +304,7 @@ const Courses = () => {
                         </div>
                         <Button
                           size="lg"
-                          onClick={() => handleEnroll(course.id)}
+                          onClick={() => handleEnroll(course.id, course.title)}
                           disabled={enrollingId === course.id}
                           className={`min-w-[160px] font-semibold rounded-xl transition-all duration-300 ${
                             isPurchased
