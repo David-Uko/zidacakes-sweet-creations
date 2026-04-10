@@ -13,6 +13,7 @@ const Courses = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [enrollingId, setEnrollingId] = useState<string | null>(null);
+  const [paymentModal, setPaymentModal] = useState<{ courseId: string; title: string } | null>(null);
 
   const { data: courses = [], isLoading } = useQuery({
     queryKey: ["courses"],
@@ -45,7 +46,7 @@ const Courses = () => {
     userCourses.filter((uc) => uc.payment_status === "paid").map((uc) => uc.course_id)
   );
 
-  const handleEnroll = async (courseId: string) => {
+  const handleEnroll = (courseId: string, courseTitle: string) => {
     if (!user) {
       navigate("/auth", { state: { from: "/courses" } });
       return;
@@ -56,6 +57,11 @@ const Courses = () => {
       return;
     }
 
+    setPaymentModal({ courseId, title: courseTitle });
+  };
+
+  const handleStripePayment = async (courseId: string) => {
+    setPaymentModal(null);
     setEnrollingId(courseId);
     try {
       const { data, error } = await supabase.functions.invoke("create-course-checkout", {
@@ -67,6 +73,25 @@ const Courses = () => {
       }
     } catch (err: any) {
       toast.error("Failed to start checkout. Please try again.");
+      console.error(err);
+    } finally {
+      setEnrollingId(null);
+    }
+  };
+
+  const handlePayPalPayment = async (courseId: string) => {
+    setPaymentModal(null);
+    setEnrollingId(courseId);
+    try {
+      const { data, error } = await supabase.functions.invoke("create-course-paypal-order", {
+        body: { courseId },
+      });
+      if (error) throw error;
+      if (data?.approvalUrl) {
+        window.location.href = data.approvalUrl;
+      }
+    } catch (err: any) {
+      toast.error("Failed to start PayPal checkout. Please try again.");
       console.error(err);
     } finally {
       setEnrollingId(null);
