@@ -126,7 +126,7 @@ const CourseContent = () => {
                     Join our exclusive Telegram community for direct access to mentors, weekly sessions, and personalised feedback.
                   </p>
                   <a
-                    href="https://t.me/+YourTelegramGroupLink"
+                    href={course?.telegram_link || "https://t.me/+h-g41WJhYHM1NTY0"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors text-sm"
