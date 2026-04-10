@@ -120,10 +120,10 @@ const CourseContent = () => {
                 </div>
                 <div>
                   <h3 className="font-display text-lg font-bold text-emerald-800 dark:text-emerald-300 mb-1">
-                    🎉 You now have access to Private Mentorship!
+                    🎉 You now have access to private mentorship!
                   </h3>
                   <p className="text-emerald-700 dark:text-emerald-400 text-sm mb-4">
-                    Join our exclusive Telegram community for direct access to mentors, weekly sessions, and personalised feedback.
+                    Click below to join the private Telegram group for direct access to mentors, personalised feedback, and exclusive support.
                   </p>
                   <a
                     href={course?.telegram_link || "https://t.me/+h-g41WJhYHM1NTY0"}
