@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
-import { BookOpen, Clock, ChevronRight, GraduationCap, Users, Sparkles, Crown, Video, MessageCircle, Shield } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { BookOpen, Clock, ChevronRight, GraduationCap, Users, Sparkles, Crown, Video, MessageCircle, Shield, CreditCard, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
