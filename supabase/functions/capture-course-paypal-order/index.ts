@@ -129,9 +129,30 @@ Deno.serve(async (req) => {
     // Get course name
     const { data: course } = await supabaseAdmin
       .from("courses")
-      .select("title")
+      .select("title, is_mentorship")
       .eq("id", courseId)
       .single();
+
+    // Send admin notification via Web3Forms
+    try {
+      const accessKey = Deno.env.get("WEB3FORMS_ACCESS_KEY");
+      if (accessKey) {
+        await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key: accessKey,
+            subject: `New Course Enrolment - ${course?.title}`,
+            from_name: "Zidacakes'n'more Courses",
+            name: user.user_metadata?.full_name || "Student",
+            email: user.email,
+            message: `New course enrolment!\n\nCourse: ${course?.title}\nStudent: ${user.user_metadata?.full_name || "N/A"}\nEmail: ${user.email}\nPayment: PayPal\nPayPal Order: ${paypalOrderId}\nMentorship: ${course?.is_mentorship ? "Yes" : "No"}`,
+          }),
+        });
+      }
+    } catch (w3fErr) {
+      console.error("Web3Forms notification failed:", w3fErr);
+    }
 
     return new Response(JSON.stringify({
       success: true,
