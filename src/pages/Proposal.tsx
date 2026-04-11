@@ -1,4 +1,4 @@
-const Proposal = () => {
+﻿const Proposal = () => {
   const handlePrint = () => window.print();
 
   return (
@@ -39,7 +39,7 @@ const Proposal = () => {
               ["Frontend Framework", "React with TypeScript"],
               ["Styling", "Tailwind CSS (custom-themed)"],
               ["Animations", "Framer Motion & custom CSS"],
-              ["Backend & Database", "Supabase (Lovable Cloud)"],
+              ["Backend & Database", "Supabase (Zidacakes'n'more Cloud)"],
               ["Authentication", "Supabase Auth (email & password)"],
               ["Payments", "Stripe & PayPal integration"],
               ["Email Notifications", "EmailJS (customer) & Web3Forms (admin)"],

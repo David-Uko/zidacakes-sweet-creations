@@ -1,4 +1,4 @@
-import { createClient } from "npm:@supabase/supabase-js@2.49.4";
+﻿import { createClient } from "npm:@supabase/supabase-js@2.49.4";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,9 +7,9 @@ const corsHeaders = {
 };
 
 async function askAssistant(question: string) {
-  const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+  const Zidacakes'n'moreApiKey = Deno.env.get("Zidacakes'n'more_API_KEY");
 
-  if (!lovableApiKey) {
+  if (!Zidacakes'n'moreApiKey) {
     return {
       response:
         "Thanks for your message — our support team will help shortly. Please share your order ID if your question is order-related.",
@@ -17,11 +17,11 @@ async function askAssistant(question: string) {
     };
   }
 
-  const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+  const response = await fetch("https://ai.gateway.Zidacakes'n'more.dev/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${lovableApiKey}`,
+      Authorization: `Bearer ${Zidacakes'n'moreApiKey}`,
     },
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
