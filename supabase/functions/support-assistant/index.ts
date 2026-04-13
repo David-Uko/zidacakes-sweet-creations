@@ -7,9 +7,9 @@ const corsHeaders = {
 };
 
 async function askAssistant(question: string) {
-  const Zidacakes'n'moreApiKey = Deno.env.get("Zidacakes'n'more_API_KEY");
+  const claudeApiKey = Deno.env.get("ANTHROPIC_API_KEY");
 
-  if (!Zidacakes'n'moreApiKey) {
+  if (!claudeApiKey) {
     return {
       response:
         "Thanks for your message — our support team will help shortly. Please share your order ID if your question is order-related.",
@@ -17,11 +17,11 @@ async function askAssistant(question: string) {
     };
   }
 
-  const response = await fetch("https://ai.gateway.Zidacakes'n'more.dev/v1/chat/completions", {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${Zidacakes'n'moreApiKey}`,
+      Authorization: `Bearer ${claudeApiKey}`,
     },
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
