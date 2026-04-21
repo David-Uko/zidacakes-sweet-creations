@@ -15,7 +15,6 @@ import {
 
 const sizes = ["6 inch (serves 8-10)", "8 inch (serves 12-16)", "10 inch (serves 20-24)", "12 inch (serves 30-36)"];
 const flavors = ["Vanilla", "Chocolate", "Red Velvet", "Lemon", "Strawberry", "Carrot", "Marble"];
-const fillings = ["Buttercream", "Cream Cheese", "Ganache", "Fresh Fruit", "Custard", "Whipped Cream"];
 const deliveryMethods = ["Pickup", "Standard Delivery", "Express Delivery"];
 
 const Customize = () => {
@@ -26,7 +25,6 @@ const Customize = () => {
 
   const [size, setSize] = useState("");
   const [flavor, setFlavor] = useState("");
-  const [filling, setFilling] = useState("");
   const [color, setColor] = useState("#E91E63");
   const [delivery, setDelivery] = useState("");
   const [deliveryDate, setDeliveryDate] = useState("");
@@ -70,14 +68,13 @@ const Customize = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Auth gate: redirect to login if not signed in
     if (!user) {
       toast({ title: "Please log in or create an account to place an order.", variant: "destructive" });
       navigate("/auth");
       return;
     }
 
-    if (!size || !flavor || !filling || !delivery || !fullName || !email || !phone) {
+    if (!size || !flavor || !delivery || !fullName || !email || !phone) {
       toast({ title: "Please fill in all required fields", variant: "destructive" });
       return;
     }
@@ -85,7 +82,6 @@ const Customize = () => {
     setSubmitting(true);
 
     try {
-      // Upload reference image if provided
       let imageUrl = "";
       if (referenceImage) {
         const ext = referenceImage.name.split(".").pop();
@@ -96,7 +92,6 @@ const Customize = () => {
         imageUrl = urlData.publicUrl;
       }
 
-      // Save order to database
       const { data: order, error: dbError } = await supabase
         .from("custom_orders")
         .insert({
@@ -106,7 +101,6 @@ const Customize = () => {
           phone_number: phone,
           size,
           flavor,
-          filling,
           color,
           delivery_method: delivery,
           delivery_date: deliveryDate || null,
@@ -119,7 +113,6 @@ const Customize = () => {
 
       if (dbError) throw dbError;
 
-      // Send order details via Web3Forms
       await supabase.functions.invoke("send-admin-notification", {
         body: {
           orderId: order.id,
@@ -128,7 +121,7 @@ const Customize = () => {
           phoneNumber: phone,
           size,
           flavor,
-          filling,
+          filling: "N/A",
           color,
           deliveryMethod: delivery,
           deliveryDate: deliveryDate || "Not specified",
@@ -138,7 +131,6 @@ const Customize = () => {
         },
       });
 
-      // Send customer confirmation email via EmailJS (custom cake template)
       try {
         await supabase.functions.invoke("send-custom-cake-email", {
           body: {
@@ -151,7 +143,7 @@ const Customize = () => {
               order_id: order.id,
               cake_size: size,
               cake_flavor: flavor,
-              cake_filling: filling,
+              cake_filling: "N/A",
               cake_color: color,
               delivery_method: delivery,
               delivery_date: deliveryDate || "Not specified",
@@ -163,13 +155,10 @@ const Customize = () => {
         console.error("Custom cake confirmation email failed:", emailErr);
       }
 
-      // Show confirmation popup
       setShowConfirmation(true);
 
-      // Reset form
       setSize("");
       setFlavor("");
-      setFilling("");
       setColor("#E91E63");
       setDelivery("");
       setDeliveryDate("");
@@ -192,7 +181,6 @@ const Customize = () => {
 
   return (
     <main className="pt-20 min-h-screen">
-      {/* Confirmation Dialog */}
       <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader className="items-center text-center">
@@ -219,7 +207,6 @@ const Customize = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Hero */}
       <section className="bg-gradient-dark py-20">
         <div className="container mx-auto px-4 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -234,7 +221,6 @@ const Customize = () => {
         </div>
       </section>
 
-      {/* Form */}
       <section className="py-16">
         <div className="container mx-auto px-4">
           <motion.div className="grid lg:grid-cols-2 gap-12">
@@ -244,25 +230,21 @@ const Customize = () => {
               onSubmit={handleSubmit}
               className="space-y-8"
             >
-              {/* Full Name */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 block">Full Name *</label>
                 <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} required placeholder="Your full name" className="w-full p-3 rounded-xl border border-border bg-card font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all" />
               </div>
 
-              {/* Email */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 block">Email *</label>
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="your@email.com" className="w-full p-3 rounded-xl border border-border bg-card font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all" />
               </div>
 
-              {/* Phone */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 block">Phone Number *</label>
                 <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} required placeholder="+1 (555) 000-0000" className="w-full p-3 rounded-xl border border-border bg-card font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all" />
               </div>
 
-              {/* Size */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 block">Size *</label>
                 <div className="grid grid-cols-2 gap-3">
@@ -272,7 +254,6 @@ const Customize = () => {
                 </div>
               </div>
 
-              {/* Flavor */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 block">Flavor *</label>
                 <div className="flex flex-wrap gap-2">
@@ -282,17 +263,6 @@ const Customize = () => {
                 </div>
               </div>
 
-              {/* Filling */}
-              <div>
-                <label className="font-display font-semibold text-lg mb-3 block">Filling *</label>
-                <div className="flex flex-wrap gap-2">
-                  {fillings.map(f => (
-                    <motion.button key={f} type="button" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => setFilling(f)} className={`px-4 py-2 rounded-full font-body text-sm transition-all ${filling === f ? "bg-gradient-pink text-primary-foreground shadow-pink" : "bg-muted hover:bg-accent"}`}>{f}</motion.button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Color */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 flex items-center gap-2">
                   <Palette className="w-5 h-5 text-primary" /> Primary Color
@@ -300,7 +270,6 @@ const Customize = () => {
                 <input type="color" value={color} onChange={e => setColor(e.target.value)} className="w-16 h-16 rounded-xl border border-border cursor-pointer" />
               </div>
 
-              {/* Delivery Method */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 block">Delivery Method *</label>
                 <div className="space-y-2">
@@ -310,7 +279,6 @@ const Customize = () => {
                 </div>
               </div>
 
-              {/* Delivery Date */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 flex items-center gap-2">
                   <Calendar className="w-5 h-5 text-primary" /> Preferred Delivery Date
@@ -318,7 +286,6 @@ const Customize = () => {
                 <input type="date" value={deliveryDate} onChange={e => setDeliveryDate(e.target.value)} min={new Date().toISOString().split("T")[0]} className="w-full p-3 rounded-xl border border-border bg-card font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all" />
               </div>
 
-              {/* Reference Image Upload */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 flex items-center gap-2">
                   <Upload className="w-5 h-5 text-primary" /> Upload Reference Image (Optional)
@@ -344,7 +311,6 @@ const Customize = () => {
                 <input ref={fileInputRef} type="file" accept=".jpg,.jpeg,.png" onChange={handleImageChange} className="hidden" />
               </div>
 
-              {/* Notes */}
               <div>
                 <label className="font-display font-semibold text-lg mb-3 block">Special Design Notes</label>
                 <textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Describe your dream cake design..." rows={4} maxLength={1000} className="w-full p-4 rounded-xl border border-border bg-card font-body text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all" />
@@ -361,7 +327,6 @@ const Customize = () => {
               </motion.button>
             </motion.form>
 
-            {/* Live Preview */}
             <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="lg:sticky lg:top-28 h-fit">
               <div className="bg-card border border-border rounded-3xl p-8 shadow-sm">
                 <h3 className="font-display text-2xl font-bold mb-6">Order Preview</h3>
@@ -372,7 +337,6 @@ const Customize = () => {
                     { label: "Phone", value: phone || "Not entered" },
                     { label: "Size", value: size || "Not selected" },
                     { label: "Flavor", value: flavor || "Not selected" },
-                    { label: "Filling", value: filling || "Not selected" },
                     { label: "Delivery", value: delivery || "Not selected" },
                     { label: "Date", value: deliveryDate || "Not selected" },
                   ].map(item => (
