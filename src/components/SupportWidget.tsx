@@ -48,6 +48,21 @@ const SupportWidget = () => {
     setSending(true);
 
     try {
+      // If user is not logged in, give a helpful fallback response
+      if (!user) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: "assistant",
+            content:
+              "Please sign in to use our live support chat. You can also reach us directly at hello@zidacakes.com or via the Contact page.",
+          },
+        ]);
+        setSending(false);
+        return;
+      }
+
       const { data, error } = await supabase.functions.invoke("support-assistant", {
         body: { message: text },
       });
@@ -59,7 +74,9 @@ const SupportWidget = () => {
         {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: data?.response || "Thanks for your message — our support team will follow up shortly.",
+          content:
+            data?.response ||
+            "Thanks for your message — our support team will follow up shortly.",
         },
       ]);
 
@@ -116,7 +133,9 @@ const SupportWidget = () => {
                 <h2 className="font-display text-lg font-semibold">Customer Support</h2>
               </div>
               <p className="font-body text-xs text-muted-foreground mt-1">
-                {user ? "Signed in as zidacakes@gmail.com" : "Ask us anything about your order."}
+                {user
+                  ? `Signed in as ${user.email}`
+                  : "Sign in to use live support chat."}
               </p>
             </header>
 
@@ -144,7 +163,8 @@ const SupportWidget = () => {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Type your question..."
+                placeholder={user ? "Type your question..." : "Sign in to chat..."}
+                disabled={!user}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
@@ -152,7 +172,12 @@ const SupportWidget = () => {
                   }
                 }}
               />
-              <Button onClick={sendMessage} disabled={sending || !input.trim()} size="icon" className="shrink-0">
+              <Button
+                onClick={sendMessage}
+                disabled={sending || !input.trim() || !user}
+                size="icon"
+                className="shrink-0"
+              >
                 <Send className="w-4 h-4" />
               </Button>
             </div>

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Cake, Mail, Lock, User } from "lucide-react";
+import { Cake, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const Auth = () => {
@@ -12,6 +12,7 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -73,16 +74,29 @@ const Auth = () => {
             <form onSubmit={handleForgotPassword} className="space-y-4">
               <div className="relative">
                 <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" required
-                  className="w-full pl-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email address"
+                  required
+                  className="w-full pl-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
               </div>
-              <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-                className="w-full bg-gradient-pink text-primary-foreground py-3 rounded-full font-body font-semibold shadow-pink hover:shadow-pink-lg transition-all disabled:opacity-50">
+              <motion.button
+                type="submit"
+                disabled={loading}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="w-full bg-gradient-pink text-primary-foreground py-3 rounded-full font-body font-semibold shadow-pink hover:shadow-pink-lg transition-all disabled:opacity-50"
+              >
                 {loading ? "Sending..." : "Send Reset Link"}
               </motion.button>
             </form>
             <p className="text-center font-body text-sm text-muted-foreground mt-6">
-              <button onClick={() => setIsForgot(false)} className="text-primary font-medium hover:underline">Back to Sign In</button>
+              <button onClick={() => setIsForgot(false)} className="text-primary font-medium hover:underline">
+                Back to Sign In
+              </button>
             </p>
           </div>
         </motion.div>
@@ -108,38 +122,85 @@ const Auth = () => {
             {isSignUp && (
               <div className="relative">
                 <User className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name" required
-                  className="w-full pl-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Full name"
+                  required
+                  className="w-full pl-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
               </div>
             )}
+
             <div className="relative">
               <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email address" required
-                className="w-full pl-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email address"
+                required
+                className="w-full pl-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
             </div>
+
             <div className="relative">
               <Lock className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required minLength={6}
-                className="w-full pl-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30" />
+              <input
+                type={showPassword ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+                minLength={6}
+                className="w-full pl-10 pr-10 p-3 rounded-xl border border-border bg-background font-body text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
 
             {!isSignUp && (
               <div className="text-right">
-                <button type="button" onClick={() => setIsForgot(true)} className="font-body text-xs text-primary hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setIsForgot(true)}
+                  className="font-body text-xs text-primary hover:underline"
+                >
                   Forgot Password?
                 </button>
               </div>
             )}
 
-            <motion.button type="submit" disabled={loading} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-              className="w-full bg-gradient-pink text-primary-foreground py-3 rounded-full font-body font-semibold shadow-pink hover:shadow-pink-lg transition-all disabled:opacity-50">
+            <motion.button
+              type="submit"
+              disabled={loading}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full bg-gradient-pink text-primary-foreground py-3 rounded-full font-body font-semibold shadow-pink hover:shadow-pink-lg transition-all disabled:opacity-50"
+            >
               {loading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
             </motion.button>
           </form>
 
           <p className="text-center font-body text-sm text-muted-foreground mt-6">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button onClick={() => setIsSignUp(!isSignUp)} className="text-primary font-medium hover:underline">
+            <button
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setShowPassword(false);
+              }}
+              className="text-primary font-medium hover:underline"
+            >
               {isSignUp ? "Sign In" : "Sign Up"}
             </button>
           </p>
