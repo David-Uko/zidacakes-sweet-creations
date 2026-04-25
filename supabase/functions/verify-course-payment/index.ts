@@ -45,12 +45,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Grant access
-    await supabaseAdmin
+    // Grant access - upsert so it works whether row exists or not
+    const { error: upsertError } = await supabaseAdmin
       .from("user_courses")
-      .update({ payment_status: "paid" })
-      .eq("user_id", user.id)
-      .eq("course_id", courseId);
+      .upsert({
+        user_id: user.id,
+        course_id: courseId,
+        payment_status: "paid",
+      }, { onConflict: "user_id,course_id" });
+
+    if (upsertError) {
+      console.error("Upsert error:", upsertError);
+      throw new Error("Failed to grant course access: " + upsertError.message);
+    }
 
     // Get course for email
     const { data: course } = await supabaseAdmin

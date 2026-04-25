@@ -87,7 +87,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const origin = req.headers.get("origin") || "https://zidacakes.com";
+    const origin = req.headers.get("origin") || "https://zidacakes-sweet-creations.vercel.app";
     const price = Number(course.price);
 
     const accessToken = await getPayPalAccessToken();
@@ -137,19 +137,18 @@ Deno.serve(async (req) => {
 
     if (!approveLink) throw new Error("No PayPal approval link");
 
-    // Create or update user_courses record with paypal order id
-    if (existing) {
-      await supabaseAdmin
-        .from("user_courses")
-        .update({ paypal_order_id: ppOrder.id, payment_status: "pending" })
-        .eq("id", existing.id);
-    } else {
-      await supabaseAdmin.from("user_courses").insert({
+    // Upsert user_courses with pending status so row exists before capture
+    const { error: upsertError } = await supabaseAdmin
+      .from("user_courses")
+      .upsert({
         user_id: user.id,
         course_id: courseId,
         paypal_order_id: ppOrder.id,
         payment_status: "pending",
-      });
+      }, { onConflict: "user_id,course_id" });
+
+    if (upsertError) {
+      console.error("Upsert pending error:", upsertError);
     }
 
     return new Response(JSON.stringify({ approvalUrl: approveLink.href, paypalOrderId: ppOrder.id }), {
@@ -163,3 +162,6 @@ Deno.serve(async (req) => {
     });
   }
 });
+
+
+

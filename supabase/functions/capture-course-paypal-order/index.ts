@@ -111,19 +111,18 @@ Deno.serve(async (req) => {
       throw new Error(`PayPal capture status: ${captureData.status || "unknown"}`);
     }
 
-    // Grant access
-    if (existing) {
-      await supabaseAdmin
-        .from("user_courses")
-        .update({ payment_status: "paid", paypal_order_id: paypalOrderId })
-        .eq("id", existing.id);
-    } else {
-      await supabaseAdmin.from("user_courses").insert({
+    // Grant access - upsert handles both new and existing rows
+    const { error: upsertError } = await supabaseAdmin
+      .from("user_courses")
+      .upsert({
         user_id: user.id,
         course_id: courseId,
-        paypal_order_id: paypalOrderId,
         payment_status: "paid",
-      });
+      }, { onConflict: "user_id,course_id" });
+
+    if (upsertError) {
+      console.error("Upsert error:", upsertError);
+      throw new Error("Failed to grant course access: " + upsertError.message);
     }
 
     // Get course name
@@ -146,7 +145,11 @@ Deno.serve(async (req) => {
             from_name: "Zidacakes'n'more Courses",
             name: user.user_metadata?.full_name || "Student",
             email: user.email,
-            message: `New course enrolment!\n\nCourse: ${course?.title}\nStudent: ${user.user_metadata?.full_name || "N/A"}\nEmail: ${user.email}\nPayment: PayPal\nPayPal Order: ${paypalOrderId}\nMentorship: ${course?.is_mentorship ? "Yes" : "No"}`,
+            message: `New course enrolment!\n\nCourse: ${course?.title}\nStudent: ${
+              user.user_metadata?.full_name || "N/A"
+            }\nEmail: ${user.email}\nPayment: PayPal\nPayPal Order: ${paypalOrderId}\nMentorship: ${
+              course?.is_mentorship ? "Yes" : "No"
+            }`,
           }),
         });
       }
