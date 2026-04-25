@@ -1,6 +1,6 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowLeft, BookOpen, Video, Lock, MessageCircle, ExternalLink } from "lucide-react";
+import { ArrowLeft, BookOpen, Video, Lock, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -106,84 +106,82 @@ const CourseContent = () => {
           <h1 className="font-display text-3xl md:text-4xl font-bold mb-2">{course?.title}</h1>
           <p className="text-muted-foreground mb-10 max-w-2xl">{course?.description}</p>
 
-          {/* Mentorship Telegram section */}
+          {/* Physical training notice for mentorship/1-to-1 course */}
           {course?.is_mentorship && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mb-10 p-6 rounded-2xl border-2 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30"
+              className="mb-10 p-6 rounded-2xl border-2 border-primary/20 bg-primary/5"
             >
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center shrink-0">
-                  <MessageCircle className="w-6 h-6 text-emerald-600" />
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <MapPin className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="font-display text-lg font-bold text-emerald-800 dark:text-emerald-300 mb-1">
-                    🎉 You now have access to private mentorship!
+                  <h3 className="font-display text-lg font-bold text-foreground mb-1">
+                    🎉 Your 1-to-1 training is confirmed!
                   </h3>
-                  <p className="text-emerald-700 dark:text-emerald-400 text-sm mb-4">
-                    Click below to join the private Telegram group for direct access to mentors, personalised feedback, and exclusive support.
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Our team will be in touch via <strong>email or phone</strong> with your class schedule, location, and everything you need to know before your first session. Please allow 24–48 hours for us to reach out.
                   </p>
-                  <a
-                    href={course?.telegram_link || "https://t.me/+h-g41WJhYHM1NTY0"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors text-sm"
-                  >
-                    <ExternalLink className="w-4 h-4" /> Join Telegram Group
-                  </a>
                 </div>
               </div>
             </motion.div>
           )}
 
-          {/* Lessons */}
-          <div className="space-y-4">
-            <h2 className="font-display text-xl font-bold mb-4">Course Lessons</h2>
-            {lessons.length === 0 ? (
-              <p className="text-muted-foreground py-8 text-center">Course content is being prepared. Check back soon!</p>
-            ) : (
-              lessons.map((lesson, index) => (
-                <motion.div
-                  key={lesson.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.08 }}
-                  className="p-5 rounded-xl border border-border bg-card hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary font-bold text-sm">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        {lesson.video_url ? (
-                          <Video className="w-4 h-4 text-primary" />
-                        ) : (
-                          <BookOpen className="w-4 h-4 text-primary" />
-                        )}
-                        <h3 className="font-semibold text-foreground">{lesson.title}</h3>
+          {/* Lessons — only shown for non-mentorship courses */}
+          {!course?.is_mentorship && (
+            <div className="space-y-4">
+              <h2 className="font-display text-xl font-bold mb-4">Course Lessons</h2>
+              {lessons.length === 0 ? (
+                <p className="text-muted-foreground py-8 text-center">
+                  Course content is being prepared. Check back soon!
+                </p>
+              ) : (
+                lessons.map((lesson, index) => (
+                  <motion.div
+                    key={lesson.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.08 }}
+                    className="p-5 rounded-xl border border-border bg-card hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 text-primary font-bold text-sm">
+                        {index + 1}
                       </div>
-                      {lesson.content && (
-                        <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{lesson.content}</p>
-                      )}
-                      {lesson.video_url && (
-                        <div className="mt-4 rounded-lg overflow-hidden aspect-video bg-muted">
-                          <iframe
-                            src={lesson.video_url}
-                            className="w-full h-full"
-                            allowFullScreen
-                            title={lesson.title}
-                          />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          {lesson.video_url ? (
+                            <Video className="w-4 h-4 text-primary" />
+                          ) : (
+                            <BookOpen className="w-4 h-4 text-primary" />
+                          )}
+                          <h3 className="font-semibold text-foreground">{lesson.title}</h3>
                         </div>
-                      )}
+                        {lesson.content && (
+                          <p className="text-sm text-muted-foreground mt-1 leading-relaxed">
+                            {lesson.content}
+                          </p>
+                        )}
+                        {lesson.video_url && (
+                          <div className="mt-4 rounded-lg overflow-hidden aspect-video bg-muted">
+                            <iframe
+                              src={lesson.video_url}
+                              className="w-full h-full"
+                              allowFullScreen
+                              title={lesson.title}
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </motion.div>
-              ))
-            )}
-          </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          )}
         </motion.div>
       </div>
     </main>

@@ -35,6 +35,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminPayments from "./pages/admin/AdminPayments";
 import AdminSettings from "./pages/admin/AdminSettings";
+import Gallery from "@/pages/Gallery";
 
 const queryClient = new QueryClient();
 
@@ -69,6 +70,7 @@ const App = () => (
                     <Route path="/reset-password" element={<PageTransition><ResetPassword /></PageTransition>} />
                     <Route path="/" element={<PageTransition><Index /></PageTransition>} />
                     <Route path="/shop" element={<PageTransition><Shop /></PageTransition>} />
+                    <Route path="/gallery" element={<PageTransition><Gallery /></PageTransition>} />
                     <Route path="/customize" element={<PageTransition><Customize /></PageTransition>} />
                     <Route path="/about" element={<PageTransition><About /></PageTransition>} />
                     <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
