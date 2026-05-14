@@ -189,3 +189,5 @@ const CourseContent = () => {
 };
 
 export default CourseContent;
+
+

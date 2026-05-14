@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from "react";
-import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle, BookOpen, Loader2, Calendar, Phone, Mail,
@@ -10,28 +10,21 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { format, addDays, addWeeks, getDay } from "date-fns";
+import { format, addWeeks, addDays, isBefore, startOfDay } from "date-fns";
 
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-const FULL_DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+const WEEKDAYS = [
+  { label: "Mon", full: "Monday", value: 1 },
+  { label: "Tue", full: "Tuesday", value: 2 },
+  { label: "Wed", full: "Wednesday", value: 3 },
+  { label: "Thu", full: "Thursday", value: 4 },
+  { label: "Fri", full: "Friday", value: 5 },
+];
 
-// Generate 30 available dates starting 2 weeks from today
-function getAvailableDates(): Date[] {
-  const dates: Date[] = [];
-  const start = addWeeks(new Date(), 2);
-  let current = new Date(start);
-  current.setHours(0, 0, 0, 0);
-  while (dates.length < 30) {
-    dates.push(new Date(current));
-    current = addDays(current, 1);
-  }
-  return dates;
-}
+const WEB3FORMS_KEY = "517ec22b-c8b1-4f3b-9b55-a17d8780862e";
 
 const CourseSuccess = () => {
   const [searchParams] = useSearchParams();
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const [verifying, setVerifying] = useState(true);
   const [courseName, setCourseName] = useState("");
@@ -44,7 +37,8 @@ const CourseSuccess = () => {
   const [fullName, setFullName] = useState(user?.user_metadata?.full_name || "");
   const [email, setEmail] = useState(user?.email || "");
   const [phone, setPhone] = useState("");
-  const [selectedDays, setSelectedDays] = useState<Date[]>([]);
+  const [startDate, setStartDate] = useState("");
+  const [selectedDays, setSelectedDays] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const sessionId = searchParams.get("session_id");
@@ -52,21 +46,30 @@ const CourseSuccess = () => {
   const isPayPal = searchParams.get("paypal") === "true";
   const paypalToken = searchParams.get("token");
 
-  const availableDates = useMemo(() => getAvailableDates(), []);
-  const twoWeeksFromNow = addWeeks(new Date(), 2);
+  // Min date = 2 weeks from today
+  const minDate = useMemo(() => {
+    const d = addWeeks(new Date(), 2);
+    return format(d, "yyyy-MM-dd");
+  }, []);
+
+  // Max date = 3 months from today
+  const maxDate = useMemo(() => {
+    const d = addWeeks(new Date(), 14);
+    return format(d, "yyyy-MM-dd");
+  }, []);
 
   useEffect(() => {
     const verify = async () => {
       if (isPayPal && cId && paypalToken) {
         try {
-          const { data, error: fnError } = await supabase.functions.invoke("capture-course-paypal-order", {
-            body: { paypalOrderId: paypalToken, courseId: cId },
-          });
+          const { data, error: fnError } = await supabase.functions.invoke(
+            "capture-course-paypal-order",
+            { body: { paypalOrderId: paypalToken, courseId: cId } }
+          );
           if (fnError) throw fnError;
           if (data?.success) {
             setCourseName(data.courseName || "your course");
             setCourseId(cId);
-            // Check if mentorship
             const { data: course } = await supabase
               .from("courses")
               .select("is_mentorship")
@@ -91,9 +94,10 @@ const CourseSuccess = () => {
       }
 
       try {
-        const { data, error: fnError } = await supabase.functions.invoke("verify-course-payment", {
-          body: { sessionId, courseId: cId },
-        });
+        const { data, error: fnError } = await supabase.functions.invoke(
+          "verify-course-payment",
+          { body: { sessionId, courseId: cId } }
+        );
         if (fnError) throw fnError;
         if (data?.success) {
           setCourseName(data.courseName || "your course");
@@ -117,25 +121,36 @@ const CourseSuccess = () => {
     verify();
   }, [sessionId, cId, isPayPal, paypalToken]);
 
-  const toggleDay = (date: Date) => {
+  const toggleDay = (val: number) => {
     setSelectedDays((prev) => {
-      const exists = prev.find((d) => d.toDateString() === date.toDateString());
-      if (exists) return prev.filter((d) => d.toDateString() !== date.toDateString());
+      if (prev.includes(val)) return prev.filter((d) => d !== val);
       if (prev.length >= 3) {
-        toast.error("You can only select 3 days per week.");
+        toast.error("You can only select 3 days.");
         return prev;
       }
-      return [...prev, date];
+      return [...prev, val];
     });
   };
 
   const handleBookingSubmit = async () => {
     if (!fullName.trim() || !email.trim() || !phone.trim()) {
-      toast.error("Please fill in all fields.");
+      toast.error("Please fill in all your details.");
+      return;
+    }
+    if (!startDate) {
+      toast.error("Please select a start date.");
       return;
     }
     if (selectedDays.length !== 3) {
-      toast.error("Please select exactly 3 days for your classes.");
+      toast.error("Please select exactly 3 days per week.");
+      return;
+    }
+
+    // Validate start date is at least 2 weeks away
+    const chosen = startOfDay(new Date(startDate));
+    const earliest = startOfDay(addWeeks(new Date(), 2));
+    if (isBefore(chosen, earliest)) {
+      toast.error("Start date must be at least 2 weeks from today.");
       return;
     }
 
@@ -149,40 +164,52 @@ const CourseSuccess = () => {
           full_name: fullName,
           email: email,
           phone: phone,
-          selected_days: selectedDays.map((d) => format(d, "yyyy-MM-dd")),
+          selected_days: selectedDays.map(
+            (v) => WEEKDAYS.find((d) => d.value === v)?.full || ""
+          ),
         });
       }
 
-      // Send to admin via Web3Forms
-      const formattedDays = selectedDays
-        .sort((a, b) => a.getTime() - b.getTime())
-        .map((d) => `${FULL_DAY_NAMES[getDay(d)]} ${format(d, "do MMMM yyyy")}`)
+      const dayNames = selectedDays
+        .sort((a, b) => a - b)
+        .map((v) => WEEKDAYS.find((d) => d.value === v)?.full)
         .join(", ");
 
-      const web3Key = import.meta.env.VITE_WEB3FORMS_KEY;
-      await fetch("https://api.web3forms.com/submit", {
+      const formattedStart = format(new Date(startDate), "EEEE do MMMM yyyy");
+
+      // Send to admin via Web3Forms
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: web3Key || "YOUR_WEB3FORMS_KEY",
-          subject: `New 1:1 SMBC Class Booking — ${fullName}`,
+          access_key: WEB3FORMS_KEY,
+          subject: `New 1-to-1 SMBC Booking — ${fullName}`,
           from_name: "Zidacakes'n'more Bookings",
           name: fullName,
           email: email,
-          message: `New physical class booking!\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone}\nCourse: ${courseName}\n\nSelected Class Days:\n${formattedDays}`,
+          phone: phone,
+          course: courseName,
+          start_date: formattedStart,
+          class_days: dayNames,
+          message: `New physical class booking!\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone}\nCourse: ${courseName}\nRequested Start Date: ${formattedStart}\nClass Days: ${dayNames}`,
         }),
       });
 
+      const result = await res.json();
+      if (!result.success) {
+        throw new Error("Web3Forms submission failed: " + result.message);
+      }
+
       setStep("done");
     } catch (err: any) {
+      console.error("Booking error:", err);
       toast.error("Failed to submit booking. Please try again.");
-      console.error(err);
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Loading state
+  // Loading
   if (verifying) {
     return (
       <main className="pt-20 min-h-screen flex items-center justify-center bg-background">
@@ -201,7 +228,7 @@ const CourseSuccess = () => {
     );
   }
 
-  // Error state
+  // Error
   if (error) {
     return (
       <main className="pt-20 min-h-screen flex items-center justify-center">
@@ -228,7 +255,6 @@ const CourseSuccess = () => {
             className="min-h-screen flex items-center justify-center px-4"
           >
             <div className="text-center max-w-lg mx-auto">
-              {/* Animated checkmark */}
               <motion.div
                 initial={{ scale: 0, rotate: -180 }}
                 animate={{ scale: 1, rotate: 0 }}
@@ -241,11 +267,7 @@ const CourseSuccess = () => {
                 </div>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-sm font-semibold mb-4">
                   <Sparkles className="w-4 h-4" /> Payment Confirmed
                 </div>
@@ -253,13 +275,14 @@ const CourseSuccess = () => {
                   Congratulations! 🎉
                 </h1>
                 <p className="text-muted-foreground text-lg mb-3 leading-relaxed">
-                  You've successfully enrolled in <strong className="text-foreground">{courseName}</strong>.
+                  You have successfully enrolled in{" "}
+                  <strong className="text-foreground">{courseName}</strong>.
                 </p>
                 <p className="text-muted-foreground mb-8 leading-relaxed">
-                  You're now one step closer to mastering Swiss Meringue Buttercream with personalised, hands-on coaching at our UK training centre.
+                  You are now one step closer to mastering Swiss Meringue Buttercream with
+                  personalised, hands-on coaching at our UK training centre.
                 </p>
 
-                {/* Info cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-8">
                   {[
                     { icon: <MapPin className="w-4 h-4" />, label: "Location", value: "UK Training Centre" },
@@ -283,11 +306,7 @@ const CourseSuccess = () => {
                 </div>
 
                 {isMentorship ? (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.9 }}
-                  >
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }}>
                     <Button
                       size="lg"
                       onClick={() => setStep("booking")}
@@ -295,9 +314,7 @@ const CourseSuccess = () => {
                     >
                       Book Your Classes <ChevronRight className="w-5 h-5" />
                     </Button>
-                    <p className="text-xs text-muted-foreground mt-3">
-                      Takes less than 2 minutes to complete
-                    </p>
+                    <p className="text-xs text-muted-foreground mt-3">Takes less than 2 minutes</p>
                   </motion.div>
                 ) : (
                   <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -326,35 +343,36 @@ const CourseSuccess = () => {
             transition={{ duration: 0.5 }}
             className="py-12 px-4"
           >
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-xl mx-auto">
+
               {/* Header */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center mb-10"
-              >
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-10">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-4">
                   <Calendar className="w-4 h-4" /> Schedule Your Classes
                 </div>
                 <h2 className="font-display text-3xl md:text-4xl font-bold mb-3">
-                  Book Your Training Days
+                  Book Your Training
                 </h2>
                 <p className="text-muted-foreground max-w-md mx-auto leading-relaxed">
-                  Fill in your details and select <strong>3 days</strong> for your classes.
-                  Available dates begin <strong>{format(twoWeeksFromNow, "do MMMM yyyy")}</strong> — two weeks from today.
+                  Choose your preferred start date and 3 days per week for your classes.
+                  Your start date must be at least{" "}
+                  <strong>2 weeks from today</strong>.
                 </p>
               </motion.div>
 
-              <div className="space-y-8">
+              <div className="space-y-6">
+
                 {/* Personal Details */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.15 }}
+                  transition={{ delay: 0.1 }}
                   className="bg-card border border-border rounded-2xl p-6 shadow-sm"
                 >
                   <h3 className="font-semibold text-lg mb-5 flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">1</span>
+                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                      1
+                    </span>
                     Your Details
                   </h3>
                   <div className="space-y-4">
@@ -390,126 +408,166 @@ const CourseSuccess = () => {
                   </div>
                 </motion.div>
 
-                {/* Day Picker */}
+                {/* Start Date */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.25 }}
+                  transition={{ delay: 0.2 }}
                   className="bg-card border border-border rounded-2xl p-6 shadow-sm"
                 >
                   <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">2</span>
-                    Select Your 3 Class Days
+                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                      2
+                    </span>
+                    Preferred Start Date
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Select the date you would like your classes to begin.
+                  </p>
+
+                  {/* Notice */}
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 mb-4">
+                    <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-700 dark:text-amber-400">
+                      Earliest available start date is{" "}
+                      <strong>{format(addWeeks(new Date(), 2), "EEEE do MMMM yyyy")}</strong>.
+                      This allows us time to prepare your personalised training plan.
+                    </p>
+                  </div>
+
+                  <input
+                    type="date"
+                    value={startDate}
+                    min={minDate}
+                    max={maxDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="w-full h-12 px-4 rounded-xl border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                  />
+
+                  {startDate && (
+                    <motion.p
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-sm text-primary font-medium mt-3 flex items-center gap-2"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      Classes will begin on{" "}
+                      <strong>{format(new Date(startDate), "EEEE do MMMM yyyy")}</strong>
+                    </motion.p>
+                  )}
+                </motion.div>
+
+                {/* Day Selector */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="bg-card border border-border rounded-2xl p-6 shadow-sm"
+                >
+                  <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                    <span className="w-7 h-7 rounded-full bg-primary text-primary-foreground text-xs font-bold flex items-center justify-center">
+                      3
+                    </span>
+                    Choose Your 3 Days Per Week
                   </h3>
                   <p className="text-sm text-muted-foreground mb-5">
-                    Choose any 3 dates from the calendar below.
-                    <span className="ml-2 inline-flex items-center gap-1 text-primary font-medium">
+                    Select exactly 3 days from Monday to Friday that work best for you each week.
+                    <span className="ml-2 text-primary font-medium">
                       {selectedDays.length}/3 selected
                     </span>
                   </p>
 
-                  {/* Notice banner */}
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 mb-5">
-                    <Clock className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-700 dark:text-amber-400">
-                      Dates available from <strong>{format(twoWeeksFromNow, "EEEE do MMMM yyyy")}</strong>. This gives us time to prepare your personalised training plan.
-                    </p>
-                  </div>
-
-                  {/* Calendar grid */}
-                  <div className="grid grid-cols-7 gap-1 mb-3">
-                    {DAY_NAMES.map((d) => (
-                      <div key={d} className="text-center text-xs font-semibold text-muted-foreground py-1">
-                        {d}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Month grouping */}
-                  {Array.from(
-                    availableDates.reduce((groups, date) => {
-                      const key = format(date, "MMMM yyyy");
-                      if (!groups.has(key)) groups.set(key, []);
-                      groups.get(key)!.push(date);
-                      return groups;
-                    }, new Map<string, Date[]>())
-                  ).map(([month, dates]) => (
-                    <div key={month} className="mb-6">
-                      <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-primary" /> {month}
-                      </p>
-                      <div className="grid grid-cols-7 gap-1">
-                        {/* Empty cells for day offset */}
-                        {Array.from({ length: getDay(dates[0]) }).map((_, i) => (
-                          <div key={`empty-${i}`} />
-                        ))}
-                        {dates.map((date) => {
-                          const isSelected = selectedDays.some(
-                            (d) => d.toDateString() === date.toDateString()
-                          );
-                          const selIndex = selectedDays.findIndex(
-                            (d) => d.toDateString() === date.toDateString()
-                          );
-                          return (
-                            <motion.button
-                              key={date.toISOString()}
-                              whileHover={{ scale: 1.1 }}
-                              whileTap={{ scale: 0.95 }}
-                              onClick={() => toggleDay(date)}
-                              className={`relative aspect-square rounded-xl text-xs font-semibold flex flex-col items-center justify-center transition-all duration-200 ${
-                                isSelected
-                                  ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
-                                  : "bg-muted/50 hover:bg-primary/10 hover:text-primary text-foreground"
-                              }`}
+                  <div className="grid grid-cols-5 gap-2">
+                    {WEEKDAYS.map((day) => {
+                      const isSelected = selectedDays.includes(day.value);
+                      return (
+                        <motion.button
+                          key={day.value}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          onClick={() => toggleDay(day.value)}
+                          className={`relative flex flex-col items-center justify-center py-4 rounded-xl border-2 transition-all duration-200 font-semibold text-sm ${
+                            isSelected
+                              ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25"
+                              : "bg-muted/30 text-muted-foreground border-border hover:border-primary/40 hover:text-primary hover:bg-primary/5"
+                          }`}
+                        >
+                          {isSelected && (
+                            <motion.span
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              className="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-emerald-500 text-white text-[9px] flex items-center justify-center font-bold shadow-md"
                             >
-                              {isSelected && (
-                                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 text-white text-[9px] flex items-center justify-center font-bold">
-                                  {selIndex + 1}
-                                </span>
-                              )}
-                              <span>{format(date, "d")}</span>
-                              <span className="text-[9px] opacity-70">{DAY_NAMES[getDay(date)]}</span>
-                            </motion.button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  ))}
+                              {selectedDays.indexOf(day.value) + 1}
+                            </motion.span>
+                          )}
+                          <span className="text-base">{day.label}</span>
+                          <span className="text-[9px] mt-0.5 opacity-60 hidden sm:block">{day.full}</span>
+                        </motion.button>
+                      );
+                    })}
+                  </div>
 
-                  {/* Selected days summary */}
-                  {selectedDays.length > 0 && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/20"
-                    >
-                      <p className="text-sm font-semibold text-primary mb-2">Your selected days:</p>
-                      <div className="space-y-1">
-                        {selectedDays
-                          .sort((a, b) => a.getTime() - b.getTime())
-                          .map((d, i) => (
-                            <div key={i} className="flex items-center gap-2 text-sm">
-                              <span className="w-5 h-5 rounded-full bg-primary text-primary-foreground text-xs flex items-center justify-center font-bold">
-                                {i + 1}
-                              </span>
-                              <span>{FULL_DAY_NAMES[getDay(d)]}, {format(d, "do MMMM yyyy")}</span>
-                            </div>
-                          ))}
-                      </div>
-                    </motion.div>
-                  )}
+                  {/* Selected summary */}
+                  <AnimatePresence>
+                    {selectedDays.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/20"
+                      >
+                        <p className="text-sm font-semibold text-primary mb-2">Your weekly schedule:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {selectedDays
+                            .sort((a, b) => a - b)
+                            .map((v) => {
+                              const day = WEEKDAYS.find((d) => d.value === v);
+                              return (
+                                <span
+                                  key={v}
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold"
+                                >
+                                  <CheckCircle className="w-3 h-3" />
+                                  {day?.full}
+                                </span>
+                              );
+                            })}
+                        </div>
+                        {startDate && selectedDays.length === 3 && (
+                          <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+                            Starting{" "}
+                            <strong className="text-foreground">
+                              {format(new Date(startDate), "do MMMM yyyy")}
+                            </strong>
+                            , your classes will run every{" "}
+                            <strong className="text-foreground">
+                              {selectedDays
+                                .sort((a, b) => a - b)
+                                .map((v) => WEEKDAYS.find((d) => d.value === v)?.full)
+                                .join(", ")}
+                            </strong>
+                            .
+                          </p>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
 
                 {/* Submit */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.35 }}
-                >
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                   <Button
                     size="lg"
                     onClick={handleBookingSubmit}
-                    disabled={submitting || selectedDays.length !== 3 || !fullName || !email || !phone}
+                    disabled={
+                      submitting ||
+                      selectedDays.length !== 3 ||
+                      !fullName.trim() ||
+                      !email.trim() ||
+                      !phone.trim() ||
+                      !startDate
+                    }
                     className="w-full h-14 text-base font-semibold rounded-xl bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 disabled:opacity-50"
                   >
                     {submitting ? (
@@ -553,23 +611,21 @@ const CourseSuccess = () => {
                 </div>
               </motion.div>
 
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
                 <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
-                  You're All Set! ✨
+                  You are All Set! ✨
                 </h1>
                 <p className="text-muted-foreground text-lg mb-6 leading-relaxed">
-                  Your booking has been received. Our team will reach out to you via <strong>email or phone call</strong> with further information regarding your classes, including the <strong>exact location, time, and what to bring</strong>.
+                  Your booking has been received. Our team will reach out to you via{" "}
+                  <strong>email or phone call</strong> with further information about your classes,
+                  including the <strong>exact location, time, and what to bring</strong>.
                 </p>
 
                 <div className="p-5 rounded-2xl border border-border bg-muted/30 mb-8 text-left">
                   <p className="text-sm font-semibold mb-3 text-foreground">What happens next:</p>
                   {[
-                    "We review your selected class dates",
-                    "Our team contacts you within 24–48 hours",
+                    "We review your selected start date and class days",
+                    "Our team contacts you within 24 to 48 hours",
                     "You receive full class details including location and time",
                     "Show up and start your baking journey!",
                   ].map((item, i) => (

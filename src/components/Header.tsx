@@ -15,6 +15,7 @@ const navLinks = [
   { to: "/contact", label: "Contact" },
 ];
 
+
 const Header = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { totalItems, setIsCartOpen } = useCart();
@@ -49,7 +50,7 @@ const Header = () => {
                   layoutId="nav-underline"
                   className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-pink rounded-full"
                 />
-              )}
+              )}      
             </Link>
           ))}
         </nav>

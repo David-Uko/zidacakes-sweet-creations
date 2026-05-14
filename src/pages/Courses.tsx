@@ -284,15 +284,7 @@ const Courses = () => {
                         </div>
                       )}
 
-                      {/* Mentorship highlight */}
-                      {isMentorship && (
-                        <div className="mb-6 p-4 rounded-xl bg-primary/5 border border-primary/10">
-                          <div className="flex items-center gap-2 text-sm font-medium text-primary">
-                            <MessageCircle className="w-4 h-4" />
-                            Private Telegram Group Access Included
-                          </div>
-                        </div>
-                      )}
+                      
 
                       {/* Price & CTA */}
                       <div className="flex items-end justify-between gap-4 pt-4 border-t border-border/50">
