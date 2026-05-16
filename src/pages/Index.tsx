@@ -38,7 +38,7 @@ const testimonials = [
 
 const Index = () => {
   const [testimonialIndex, setTestimonialIndex] = useState(0);
-  const bestSellers = products.slice(0, 4);
+  const bestSellers = products.filter(p => ["31", "14", "34", "22"].includes(p.id));
 
   const categoryCards = [
   { title: "Cakes", image: cakeWedding, desc: "Elegant cakes for every celebration" },
@@ -224,7 +224,7 @@ const Index = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-            { icon: Truck, title: "Fast Delivery", desc: "Same-day delivery available for orders placed before 2 PM." },
+            { icon: Truck, title: "Fast Delivery", desc: "Same-day delivery available for non-custom orders placed before 12 noon." },
             { icon: Leaf, title: "Fresh Ingredients", desc: "We use only the finest, locally sourced ingredients in every recipe." },
             { icon: Palette, title: "Custom Designs", desc: "Tell us your vision and we'll create a one-of-a-kind masterpiece." }].
             map((item, i) =>
