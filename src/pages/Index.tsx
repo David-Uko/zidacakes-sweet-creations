@@ -6,7 +6,7 @@ import { products } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
 import heroBg from "@/assets/hero-bg.jpg";
 import cupcakeAccent from "@/assets/cupcake-accent.png";
-import cakeWedding from "@/assets/cake-wedding.jpg";
+import cakeWedding from "@/assets/Wedding - 1.jpeg";
 import pastries from "@/assets/pastries.jpg";
 import desserts from "@/assets/desserts.jpg";
 
