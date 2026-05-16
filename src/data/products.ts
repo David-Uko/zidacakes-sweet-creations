@@ -8,12 +8,13 @@ export interface Product {
   description: string;
   rating: number;
   reviews: number;
+  size: string;
 }
 
 export const products: Product[] = [
   {
     id: "1",
-    name: "Wedding Cake",
+    name: "Wedding Cake - 6inches",
     price: 60.00,
     image: "/images/products/Zida 1.jpeg",
     category: "Cakes",
@@ -21,6 +22,7 @@ export const products: Product[] = [
     description: "Elegant gold accents and a bridal silhouette for your special day.",
     rating: 4.9,
     reviews: 42,
+    size: "6 inch",
   },
   {
     id: "2",
@@ -32,6 +34,7 @@ export const products: Product[] = [
     description: "Bold black, white and gold with fresh roses — as fabulous as the milestone.",
     rating: 4.8,
     reviews: 38,
+    size: "6 inch",
   },
   {
     id: "3",
@@ -43,6 +46,7 @@ export const products: Product[] = [
     description: "Colourful, playful, and perfectly personalised for your little one.",
     rating: 4.7,
     reviews: 55,
+    size: "6 inch",
   },
   {
     id: "4",
@@ -54,6 +58,7 @@ export const products: Product[] = [
     description: "Soft pastels and delicate details to welcome your newest blessing.",
     rating: 4.9,
     reviews: 61,
+    size: "6 inch",
   },
   {
     id: "5",
@@ -65,6 +70,7 @@ export const products: Product[] = [
     description: "Pretty in pink with floral touches and a personalised glitter finish.",
     rating: 5,
     reviews: 29,
+    size: "6 inch",
   },
   {
     id: "6",
@@ -76,6 +82,7 @@ export const products: Product[] = [
     description: "Gold, blue, and gorgeous — a luxe tribute to the man who deserves it all.",
     rating: 4.8,
     reviews: 47,
+    size: "6 inch",
   },
   {
     id: "7",
@@ -87,6 +94,7 @@ export const products: Product[] = [
     description: "A wild safari adventure cake to celebrate your little one's very first year.",
     rating: 5,
     reviews: 22,
+    size: "7 inch",
   },
   {
     id: "8",
@@ -98,6 +106,7 @@ export const products: Product[] = [
     description: "Every superhero fan's dream cake, packed with colour and their favourite characters.",
     rating: 4.7,
     reviews: 83,
+    size: "6 inch",
   },
   {
     id: "9",
@@ -109,6 +118,7 @@ export const products: Product[] = [
     description: "Chase, Marshall, and the whole Patrol team ready to make your child's birthday legendary.",
     rating: 4.9,
     reviews: 31,
+    size: "7 inch",
   },
   {
     id: "10",
@@ -120,8 +130,8 @@ export const products: Product[] = [
     description: "Whimsical and elegant with a ballerina charm — perfect for your little princess.",
     rating: 4.8,
     reviews: 44,
+    size: "6 inch",
   },
-
   {
     id: "12",
     name: "Custom Cake",
@@ -132,10 +142,11 @@ export const products: Product[] = [
     description: "Sleek blue and gold elegance celebrating a milestone as distinguished as the man himself.",
     rating: 4.7,
     reviews: 68,
+    size: "6 inch",
   },
   {
     id: "13",
-    name: "Birthday Cake",    
+    name: "Birthday Cake",
     price: 90.00,
     image: "/images/products/Zida 13.jpeg",
     category: "Cakes",
@@ -143,6 +154,7 @@ export const products: Product[] = [
     description: "Rich chocolate geometry and gold script a warm tribute to an extraordinary man.",
     rating: 4.8,
     reviews: 52,
+    size: "6 inch",
   },
   {
     id: "14",
@@ -154,6 +166,7 @@ export const products: Product[] = [
     description: "Soft, romantic, and timelessly beautiful — just like the woman it's made for.",
     rating: 4.9,
     reviews: 27,
+    size: "8 inch",
   },
   {
     id: "15",
@@ -165,6 +178,7 @@ export const products: Product[] = [
     description: "Elegant floral textures and gold accents marking a milestone worth celebrating.",
     rating: 4.7,
     reviews: 74,
+    size: "6 inch",
   },
   {
     id: "16",
@@ -176,6 +190,7 @@ export const products: Product[] = [
     description: "A magical wonderland of butterflies and blooms for your little fairy princess.",
     rating: 4.8,
     reviews: 41,
+    size: "7 inch",
   },
   {
     id: "17",
@@ -187,6 +202,7 @@ export const products: Product[] = [
     description: "Golden music notes and elegant script a melodic celebration of someone truly special.",
     rating: 4.6,
     reviews: 33,
+    size: "8 inch",
   },
   {
     id: "18",
@@ -198,6 +214,7 @@ export const products: Product[] = [
     description: "Two tiers of pure magic packed with Gabby's Dollhouse characters for the ultimate fan.",
     rating: 5,
     reviews: 19,
+    size: "6 inch",
   },
   {
     id: "19",
@@ -209,6 +226,7 @@ export const products: Product[] = [
     description: "Dreamy bronze and blush balloons with a cuddly teddy centrepiece — utterly irresistible.",
     rating: 4.7,
     reviews: 57,
+    size: "6 inch",
   },
   {
     id: "20",
@@ -220,6 +238,7 @@ export const products: Product[] = [
     description: "Bold blue glitter and fresh florals making forty look absolutely stunning.",
     rating: 4.8,
     reviews: 63,
+    size: "8 inch",
   },
   {
     id: "21",
@@ -231,6 +250,7 @@ export const products: Product[] = [
     description: "A heartfelt photo tribute wrapped in gold and elegance for the man who does it all.",
     rating: 4.9,
     reviews: 24,
+    size: "7 inch",
   },
   {
     id: "22",
@@ -242,6 +262,7 @@ export const products: Product[] = [
     description: "Striking black and gold drama — bold, luxurious, and impossible to forget.",
     rating: 4.8,
     reviews: 46,
+    size: "6 inch",
   },
   {
     id: "23",
@@ -253,6 +274,7 @@ export const products: Product[] = [
     description: "Pink, playful, and perfectly personalised for your little one's big first year.",
     rating: 4.9,
     reviews: 88,
+    size: "6 inch",
   },
   {
     id: "24",
@@ -264,6 +286,7 @@ export const products: Product[] = [
     description: "Timeless red roses and ivory elegance — a stunning centrepiece for your special day.",
     rating: 4.8,
     reviews: 21,
+    size: "6 inch",
   },
   {
     id: "26",
@@ -275,6 +298,7 @@ export const products: Product[] = [
     description: "Purple stars, anime figures, and pure fandom energy for your ultimate K-Pop lover.",
     rating: 4.7,
     reviews: 37,
+    size: "6 inch",
   },
   {
     id: "28",
@@ -286,6 +310,7 @@ export const products: Product[] = [
     description: "Silver glam meets golden script — sleek, sparkly, and totally show-stopping.",
     rating: 4.8,
     reviews: 61,
+    size: "6 inch",
   },
   {
     id: "29",
@@ -297,6 +322,7 @@ export const products: Product[] = [
     description: "Level up the fun with this vibrant two-tier Mario adventure every gamer will love.",
     rating: 4.7,
     reviews: 28,
+    size: "7 inch",
   },
   {
     id: "30",
@@ -308,6 +334,7 @@ export const products: Product[] = [
     description: "Sophisticated black, gold, and pearl elegance — because grandma deserves nothing less.",
     rating: 4.8,
     reviews: 49,
+    size: "8 inch",
   },
   {
     id: "31",
@@ -319,6 +346,7 @@ export const products: Product[] = [
     description: "Soft white elegance with delicate florals — a dreamy cake for life's biggest moments.",
     rating: 4.9,
     reviews: 32,
+    size: "2 Tier",
   },
   {
     id: "32",
@@ -330,6 +358,7 @@ export const products: Product[] = [
     description: "Racing into the first year in style with bold teal and checkered flair.",
     rating: 4.7,
     reviews: 39,
+    size: "2 Tier",
   },
   {
     id: "33",
@@ -341,6 +370,7 @@ export const products: Product[] = [
     description: "Graceful white ruffles and fresh blooms — a timeless tribute to a beloved grandma.",
     rating: 5,
     reviews: 17,
+    size: "2 Tier",
   },
   {
     id: "34",
@@ -352,6 +382,7 @@ export const products: Product[] = [
     description: "Pure white sophistication with lush greenery — a breathtaking wedding centrepiece.",
     rating: 4.9,
     reviews: 26,
+    size: "3 Tier",
   },
   {
     id: "35",
@@ -363,6 +394,7 @@ export const products: Product[] = [
     description: "Warm terracotta roses and golden accents — romantic, refined, and utterly unforgettable.",
     rating: 5,
     reviews: 15,
+    size: "3 Tier",
   },
 ];
 
