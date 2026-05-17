@@ -135,9 +135,9 @@ const Contact = () => {
               <div className="bg-card border border-border rounded-3xl p-8 space-y-6">
                 <h3 className="font-display text-xl font-bold">Contact Information</h3>
                 {[
-                  { icon: MapPin, label: "Visit Us", value: "123 Bakery Lane, Sweet City, SC 12345" },
-                  { icon: Phone, label: "Call Us", value: "+1 (555) 123-4567" },
-                  { icon: Mail, label: "Email Us", value: "hello@zidacakes.com" },
+                  { icon: MapPin, label: "Visit Us", value: "4 Queens House 297 Beverly Road. HU5 1LG." },
+                  { icon: Phone, label: "Call Us", value: "+44 7746 791484" },
+                  { icon: Mail, label: "Email Us", value: "zidacakes@gmail.com" },
                 ].map(item => (
                   <div key={item.label} className="flex gap-4">
                     <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center flex-shrink-0">
